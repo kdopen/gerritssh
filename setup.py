@@ -28,6 +28,8 @@ class PyTest(TestCommand):
 
 
 readme = open('README.rst').read()
+from gerritssh import __version__ as gerritssh_version
+
 doclink = """
 Documentation
 -------------
@@ -37,7 +39,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='gerritssh',
-    version='0.1.0',
+    version=gerritssh_version,
     description='Python package wrapping the Gerrit command line API',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
     author='Keith Derrick',
