@@ -16,13 +16,3 @@ Contents:
    authors
    history
    modules
-
-Feedback
-========
-
-If you have any suggestions or questions about **gerritssh** feel free to email me
-at kderrick_public@att.net.
-
-If you encounter any errors or problems with **gerritssh**, please let me know!
-Open an Issue at the GitHub http://github.com/kdopen/gerritssh main repository.
-

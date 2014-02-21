@@ -37,7 +37,7 @@ behind making this open source. I want to learn from the experience of those
 who've been there before me.
 
 Features
---------
+========
 
 * Handles the low-level details of the gerrit SSH command line syntax.
 
@@ -45,7 +45,7 @@ Features
   format which is more natural for Python programmers to manipulate.
    
 Planned Features
-----------------
+================
 
 * Switch to using paramiko instead of individual SSH commands. This is
   why the Site class has a connected attribute.
@@ -77,7 +77,15 @@ Planned Features
   * Extract the SCHEMA information with a ``\d`` command and dynamically
     clone the database into a memory-resident sqlite database.
     
-* Implement support for the events-stream command, serving up events
+* Implement support for the stream-events command, serving up events
   using an observer-pattern approach to allow many threads to consume
   events.
 
+Feedback
+========
+
+If you have any suggestions or questions about **gerritssh** feel free to email me
+at kderrick_public@att.net.
+
+If you encounter any errors or problems with **gerritssh**, please let me know!
+Open an Issue at the GitHub http://github.com/kdopen/gerritssh main repository.

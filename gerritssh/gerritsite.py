@@ -1,9 +1,42 @@
-'''
+r'''
+Representations of a Gerrit site, and the abstract base class for all
+executable commands.
+
+All sessions with a Gerrit instance begin by creating a `Site` object and
+establishing a connection::
+
+    import gerritssh as gssh
+    mysite = gssh.Site('gerrit.exmaple.com').connect()
+
+Commands are executed by creating an instance of a `SiteCommand` concrete
+class, and then executing them against the `Site` object. The following
+snippet will connect to a site, and then print out a list of all open
+reviews by project::
+
+    import gerritssh as gssh
+    mysite = gssh.Site('gerrit.example.org').connect()
+    lsprojects = gssh.ProjectList()
+    lsprojects.execute_on(mysite)
+
+    for p in lsprojects:
+        openp = gssh.open_reviews(project=p).execute_on(mysite)
+        if not openp:
+            continue
+
+        print('\n{0}\n{1}\n'.format(p, '=' * len(p)))
+        for r in openp:
+            print('{0}\t{1}\n'.format(r.ref, r.summary))
+
+
+This example also shows both ways of iterating over the results from
+executing a command. The line ``for p in lsprojects`` iterates
+directly over the `ProjectList` object, while the line ``for r in openp:``
+iterates over the list of results returned by calling `execute_on`
 
 .. note::
     This module was original called simply 'site', but that clashed
     with the built in site module which is automatically imported during
-    initialization. This lead to strange failures during runs of tox that
+    initialization. This lead to strange failures during runs of ``tox`` that
     took a little while to debug.
 
 '''
@@ -122,7 +155,9 @@ class Site(object):
         Establish an SSH connection to the site
 
         :returns: self to allow chaining
-        :raises: `ConnectionError` if it is not possible to connect to the site
+
+        :raises: `SSHConnectionError`
+            if it is not possible to connect to the site
 
         '''
         if self.__connected:
