@@ -85,8 +85,9 @@ class Query(SiteCommand):
             resume_key = partial[-1].raw['sortKey']
 
         self._results = (result[:self.__max_results]
-            if self.__max_results and len(result) > self.__max_results
-            else result)
+                         if (self.__max_results and
+                             len(result) > self.__max_results)
+                         else result)
         return self._results
 
 

@@ -54,7 +54,7 @@ from gerritssh import GerritsshException
 _logger = logging.getLogger(__name__)
 
 
-class ConnectionError(GerritsshException):
+class SSHConnectionError(GerritsshException):
     '''
     Raised when a Site object fails to connect via SSH, or when
     a method is called on an unconnected site which requires a
@@ -119,7 +119,7 @@ class Site(object):
             mysite = gerritssh.Site('gerrit.example.com').connect()
             msg = 'Connected to {}, running Gerrit version {}'
             print(msg.format(mysite.site, mysite.version)
-        except gerritssh.ConnectionError:
+        except gerritssh.SSHConnectionError:
             print('Failed to connect to site '+mysite.site)
 
     '''
@@ -148,7 +148,7 @@ class Site(object):
         '''
         cmdline = '{0} {1} {2}'.format(self.__ssh_prefix, command, args)
         _logger.debug('Executing: %s' % cmdline)
-        return _check_output(shlex.split(cmdline))
+        return _check_output(shlex.split(cmdline)).decode('utf-8')
 
     def connect(self):
         '''
@@ -163,12 +163,15 @@ class Site(object):
         if self.__connected:
             return
 
+        _logger.debug('Attempting to connect to site: {0}'.format(self.site))
+
         try:
             resp = self.__do_command('version')
         except subprocess.CalledProcessError:
-            raise ConnectionError('Failed to connect to ' + self.site)
+            raise SSHConnectionError('Failed to connect to ' + self.site)
 
         self.__connected = True
+        _logger.debug('Connected OK: resp: {0}'.format(resp.strip()))
         self.__version = self.__extract_version(resp)
         return self
 
@@ -199,14 +202,14 @@ class Site(object):
             command
 
         :raises:
-            `ConnectionError` if there is no current connection to the site
+            `SSHConnectionError` if there is no current connection to the site
 
         :raises:
             `CalledProcessError` if the command returns an error
 
         '''
         if not self.connected:
-            raise ConnectionError('No connection')
+            raise SSHConnectionError('No connection')
 
         if isinstance(cmd, SiteCommand):
             return cmd.execute_on(self)
@@ -250,11 +253,11 @@ class Site(object):
         :param (major,minor,patch): The version to use in the comparison.
 
         :returns: A Boolean result of the comparison.
-        :raises: ConnectionError if there is no connection
+        :raises: SSHConnectionError if there is no connection
 
         '''
         if not self.connected:
-            raise ConnectionError('Site is not connected')
+            raise SSHConnectionError('Site is not connected')
 
         return self.version >= (major, minor, patch)
 
@@ -412,4 +415,4 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
                     for s in SiteCommand.text_to_list(l, nonempty=True)]
         return [json.loads(s) for s in [_f for _f in jstrings if _f]]
 
-__all__ = ['Site', 'ConnectionError', 'InvalidCommandError', 'SiteCommand']
+__all__ = ['Site', 'SSHConnectionError', 'InvalidCommandError', 'SiteCommand']

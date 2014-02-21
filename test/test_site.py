@@ -49,7 +49,7 @@ class TestGerritssh(object):
         def raiseerror(a, b=''):
             raise subprocess.CalledProcessError(255, 'cmd')
         mocked_output(raiseerror)
-        with pytest.raises(gerritssh.ConnectionError): s.connect()
+        with pytest.raises(gerritssh.SSHConnectionError): s.connect()
 
     def test_failed_connection2(self, mocked_output):
         '''Mock check_output to throw TypeError'''
@@ -65,7 +65,7 @@ class TestGerritssh(object):
         attempt fails
         '''
         s = gerritssh.Site('...')
-        with pytest.raises(gerritssh.ConnectionError): s.connect()
+        with pytest.raises(gerritssh.SSHConnectionError): s.connect()
 
     def test_disconnect(self, connected_site):
         s = connected_site
@@ -113,7 +113,7 @@ class TestGerritssh(object):
         assert ev('gerrit version 2.4.4-14-gab7f4c1') == (2, 4, 4)
 
     def test_version_compare(self, connected_site):
-        with pytest.raises(gerritssh.ConnectionError):
+        with pytest.raises(gerritssh.SSHConnectionError):
             gerritssh.Site('...').version_at_least(1)
 
         s = connected_site
@@ -127,7 +127,7 @@ class TestGerritssh(object):
     def test_not_connected(self, connected_site):
         connected_site.disconnect()
         assert not connected_site.connected, 'Failed to disconnect'
-        with pytest.raises(gerritssh.ConnectionError):
+        with pytest.raises(gerritssh.SSHConnectionError):
             connected_site.execute(None)
 
     def test_abstract(self, connected_site):
