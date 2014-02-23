@@ -84,10 +84,10 @@ class TestGerritssh(object):
         s = connected_site
 
         def echo(a, _=''):
-            return a
+            return ' '.join(a)
         mocked_output(echo)
         assert s.execute('somecommand') == \
-            ['ssh', s.site, 'gerrit', 'somecommand']
+            ' '.join(['ssh', s.site, 'gerrit', 'somecommand'])
 
     def test_execute_cmd(self, connected_site):
         lp = gerritssh.ProjectList()

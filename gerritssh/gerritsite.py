@@ -148,7 +148,10 @@ class Site(object):
         '''
         cmdline = '{0} {1} {2}'.format(self.__ssh_prefix, command, args)
         _logger.debug('Executing: %s' % cmdline)
-        return _check_output(shlex.split(cmdline)).decode('utf-8')
+        result = _check_output(shlex.split(cmdline))
+        if not isinstance(result, str):
+            return result.decode('utf-8')
+        return result
 
     def connect(self):
         '''
