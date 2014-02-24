@@ -59,7 +59,7 @@ class Query(SiteCommand):
 
         '''
 
-        result, resume_key = [], ''
+        result, resume_key, remaining = [], '', self.__max_results
 
         def partial_query():
             '''Helper to perform a single sub-query'''
@@ -72,7 +72,9 @@ class Query(SiteCommand):
                                        '--commit-message',
                                        '--format=JSON',
                                        resume])
-            raw = the_site.execute(' '.join(['query', self.__query,
+            limit = 'limit:{0}'.format(remaining) if self.__max_results else ''
+            raw = the_site.execute(' '.join(['query', limit,
+                                             self.__query,
                                              standard_flags]))
             lines = self.text_to_json(raw)
             return ([review.Review(l) for l in lines[:-1]]
@@ -83,6 +85,7 @@ class Query(SiteCommand):
             if not partial: break
             result.extend(partial)
             resume_key = partial[-1].raw['sortKey']
+            remaining -= len(partial)
 
         self._results = (result[:self.__max_results]
                          if (self.__max_results and
