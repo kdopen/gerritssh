@@ -68,4 +68,5 @@ setup(
     ],
     tests_require=['pytest>=2.3.5'],
     cmdclass={'test': PyTest},
+    scripts=['gsshcli.py'],
 )
