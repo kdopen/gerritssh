@@ -182,8 +182,7 @@ def parse_command_line():
                                 'e.g review.openstack,org'))
 
     # Process arguments
-    args, extra = parser.parse_args(), []
-    print(args, extra)
+    args = parser.parse_args()
     # Set the logging level
     levels = [logging.WARNING, logging.INFO, logging.DEBUG]
     verbose = args.verbose or 0
