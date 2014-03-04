@@ -14,5 +14,6 @@ Contents:
    usage
    contributing
    authors
+   otherimplementations
    history
    modules

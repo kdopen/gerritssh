@@ -1,6 +1,6 @@
-=============================
+=========
 gerritssh
-=============================
+=========
 
 .. image:: https://badge.fury.io/py/gerritssh.png
     :target: http://badge.fury.io/py/gerritssh
@@ -17,6 +17,9 @@ Python package wrapping the Gerrit command line API.
 This is very much a work in progress, and intended to be the basis
 for building more sophisticated scripts and applications, for example
 automating complex work flows in large projects.
+
+Rationale
+---------
 
 This project was started as a test-bed for me to explore the wider
 world of Python, such as:
@@ -36,8 +39,9 @@ All contributions and suggestions are welcome, and indeed that's the logic
 behind making this open source. I want to learn from the experience of those
 who've been there before me.
 
+
 Features
-========
+--------
 
 * Handles the low-level details of the gerrit SSH command line syntax.
 
@@ -45,7 +49,7 @@ Features
   format which is more natural for Python programmers to manipulate.
    
 Planned Features
-================
+----------------
 
 * Switch to using paramiko instead of individual SSH commands. This is
   why the Site class has a connected attribute.
@@ -82,7 +86,7 @@ Planned Features
   events.
 
 Feedback
-========
+--------
 
 If you have any suggestions or questions about **gerritssh** feel free to email me
 at kderrick_public@att.net.
