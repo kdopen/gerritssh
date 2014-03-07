@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 # encoding: utf-8
 '''
 Simple CLI script to use gerritssh to talk to a site
@@ -147,6 +147,7 @@ def parse_command_line():
                         version=program_version_message)
 
     subparsers = parser.add_subparsers(dest='operation')
+    subparsers.required = True
     lp_parser = subparsers.add_parser('projects',
                                       help='List the projects')
     lp_parser.add_argument('site',
@@ -193,4 +194,4 @@ def parse_command_line():
 
 if __name__ == "__main__":
     args = parse_command_line()
-#    execute(args)
+    execute(args)
