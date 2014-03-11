@@ -47,13 +47,12 @@ Features
 
 * Makes the results of those commands available to the programmer in a
   format which is more natural for Python programmers to manipulate.
+
+* Uses a version of paramiko which supports Python 2 and 3.
    
 Planned Features
 ----------------
 
-* Switch to using paramiko instead of individual SSH commands. This is
-  why the Site class has a connected attribute.
-  
 * Support the latest commands for Gerrit v2.8 (such as ls-members)
 
 * Manage command variants for different Gerrit versions using the

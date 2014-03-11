@@ -32,9 +32,9 @@ Safe for: from review import *
 
 import datetime as dt
 
-try:
+try:  # pragma: no cover
     import urllib.parse as urlp  # Python 3
-except:
+except:  # pragma: no cover
     import urlparse as urlp  # Python 2
 
 

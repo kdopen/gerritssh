@@ -15,7 +15,7 @@ import logging
 # can simply use getLogger(__name__). If the logging module does not contain
 # a NullHandler, create a dummy one per the documentation.
 
-if 'NullHandler' not in dir(logging):
+if 'NullHandler' not in dir(logging):  # pragma: no cover
     # logging.ullHandler does not exist before v2.6 of Python
     class __NullHandler(logging.Handler):  # noqa - inhibit N801
         def emit(self, record):

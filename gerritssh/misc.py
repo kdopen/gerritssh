@@ -24,7 +24,7 @@ class ProjectList(SiteCommand):
         '''
         raw = the_site.execute(''.join(['ls-projects',
                                         ' --all' if self.__listall else '']))
-        self._results = self.text_to_list(raw, nonempty=True)
+        self._results = [l for l in raw if l]
         return self._results
 
 __all__ = ['ProjectList']

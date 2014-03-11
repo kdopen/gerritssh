@@ -41,15 +41,15 @@ iterates over the list of results returned by calling `execute_on`
 
 '''
 
-import subprocess
 import logging
-import shlex
 import re
 import json
 import collections
 import abc
 
+
 from gerritssh import GerritsshException
+from gerritssh.borrowed import ssh
 
 _logger = logging.getLogger(__name__)
 
@@ -69,36 +69,6 @@ class InvalidCommandError(GerritsshException):
     Raised when an attempt is made to execute a BaseCommand object.
     '''
     pass
-
-if not 'check_output' in dir(subprocess):
-    def _check_output(*popenargs, **kwargs):
-        # Python 2.6 does not have this check_output method.
-        #
-        # This backport comes from https://gist.github.com/edufelipe/1027906,
-        # courtesy of Eduardo Felipe.
-        #
-        r"""
-        Run command with arguments and return its output as a byte string.
-
-        Backported from Python 2.7 as it's implemented as pure python on
-        stdlib.
-
-        >>> _check_output(['/usr/bin/python', '--version'])
-        Python 2.6.2
-        """
-        proc = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = proc.communicate()
-        retcode = proc.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            error = subprocess.CalledProcessError(retcode, cmd)
-            error.output = output
-            raise error
-        return output
-else:
-    _check_output = subprocess.check_output
 
 
 class Site(object):
@@ -124,14 +94,18 @@ class Site(object):
 
     '''
 
-    def __init__(self, sitename):
+    def __init__(self, sitename, username=None, port=None):
         if not isinstance(sitename, str):
             raise TypeError('sitename must be a string')
 
         self.__site = sitename
-        self.__ssh_prefix = 'ssh {0} gerrit '.format(sitename)
+        self.__ssh_prefix = 'gerrit'
         self.__version = (0, 0, 0)
-        self.__connected = False
+        self.__ssh = ssh.GerritSSHClient(sitename, username, port)
+
+    def __repr__(self):
+        return ('<gerritssh.gerritsite.Site(site=%s, connected=%s)>'
+                % (self.site, self.connected))
 
     def __extract_version(self, vstr):
         results = re.search(r'gerrit version (\d+)\.(\d+)\.(\d+).*$', vstr)
@@ -142,16 +116,16 @@ class Site(object):
         '''
         Private method to actually execute a command
 
-        :returns str: The output from the command as a string
-        :raises: :exc:`subprocess.CalledProcessError` if the command fails
+        :returns [str]: The output from the command as a list of strings
+        :raises: :exc: `SSHException` if the command fails
 
         '''
         cmdline = '{0} {1} {2}'.format(self.__ssh_prefix, command, args)
         _logger.debug('Executing: %s' % cmdline)
-        result = _check_output(shlex.split(cmdline))
-        if not isinstance(result, str):
-            return result.decode('utf-8')
-        return result
+        result = self.__ssh.execute(cmdline)
+        _logger.debug('Response:%s' % repr(result))
+#         return result if isinstance(result, str) else result.decode('utf-8')
+        return [l for s in result.stdout.readlines() for l in s.splitlines()]
 
     def connect(self):
         '''
@@ -163,19 +137,18 @@ class Site(object):
             if it is not possible to connect to the site
 
         '''
-        if self.__connected:
+        if self.connected:
             return
 
         _logger.debug('Attempting to connect to site: {0}'.format(self.site))
 
         try:
             resp = self.__do_command('version')
-        except subprocess.CalledProcessError:
+        except ssh.SSHException:
             raise SSHConnectionError('Failed to connect to ' + self.site)
 
-        self.__connected = True
-        _logger.debug('Connected OK: resp: {0}'.format(resp.strip()))
-        self.__version = self.__extract_version(resp)
+        _logger.debug('Connected OK: resp: {0}'.format(resp[0].strip()))
+        self.__version = self.__extract_version(resp[0])
         return self
 
     def disconnect(self):
@@ -185,7 +158,7 @@ class Site(object):
         :returns: self to allow chaining
 
         '''
-        self.__connected = False
+        self.__ssh.disconnect()
         return self
 
     def execute(self, cmd):
@@ -228,7 +201,13 @@ class Site(object):
 
     @property
     def site(self):
-        ''' The original site name provided to the constructor '''
+        '''
+        The original site name provided to the constructor
+
+        This needs to be an immutable attribute of the instance once
+        it is created,hence the definition of a 'read-only' property.
+
+        '''
         return self.__site
 
     @property
@@ -242,6 +221,9 @@ class Site(object):
 
             Before connecting, or if a valid version number can not be found
             in the response from Gerrit, it has the value (0,0,0).
+
+        This needs to be an immutable attribute of the instance once
+        it is created,hence the definition of a 'read-only' property.
 
         '''
         return self.__version
@@ -267,7 +249,7 @@ class Site(object):
     @property
     def connected(self):
         ''' Indicates if there is a connection active. '''
-        return self.__connected
+        return self.__ssh.connected
 
 
 # The unusual class definition is a version-agnostic means
@@ -385,7 +367,8 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
         if not isinstance(text, str):
             raise TypeError('Argument must be a string')
         stripempty = lambda x: x if nonempty else True
-        return list(filter(stripempty, list(map(str.strip, text.split('\n')))))
+        stripped_list = [l.strip() for l in text.splitlines()]
+        return [l for l in stripped_list if stripempty(l)]
 
     @staticmethod
     def text_to_json(text_or_list):
