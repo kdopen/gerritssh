@@ -3,6 +3,7 @@
 import os
 import sys
 from setuptools.command.test import test as TestCommand
+from setuptools import find_packages
 
 try:
     from setuptools import setup
@@ -45,9 +46,7 @@ setup(
     author='Keith Derrick',
     author_email='kderrick_public@att.net',
     url='https://github.com/kdopen/gerritssh',
-    packages=[
-        'gerritssh',
-    ],
+    packages= find_packages(exclude=['test']),
     package_dir={'gerritssh': 'gerritssh'},
     include_package_data=True,
     install_requires=[
