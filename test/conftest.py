@@ -5,6 +5,7 @@ Pytest test fixtures used in the various unit tess contained in other modules.
 
 import pytest
 import gerritssh
+from gerritssh.borrowed.ssh import SSHCommandResult
 
 
 @pytest.fixture()
@@ -17,11 +18,34 @@ def connected_site(monkeypatch):
     a version of 1.0.0 and a site of 'gerrit.example.com.
 
     '''
-    monkeypatch.setattr(gerritssh.gerritsite, '_check_output',
-                        lambda *args, **kwargs: 'gerrit version 1.0.0\n')
+#     monkeypatch.setattr(gerritssh.Site, '_Site__do_command',
+#                         lambda self, cmd: self._Site__ssh.execute(cmd))
+
+    class DummySSHClient(object):
+
+        def __init__(self, *args, **kwargs):
+            self.connected = False
+
+        def execute(self, command):
+            import io
+            self.connected = True
+            result = SSHCommandResult(command,
+                                      io.StringIO(),
+                                      io.StringIO(u'gerrit version '
+                                                  '1.0.0\n'),
+                                      io.StringIO())
+
+            return result
+
+        def disconnect(self):
+            self.connected = False
+
     s = gerritssh.Site('gerrit.example.com')
+    s._Site__ssh = DummySSHClient()
     assert not s.connected, 'Thinks its connected after construction'
     s.connect()
+    assert s.connected
+    assert s.version == (1, 0, 0)
     return s
 
 '''

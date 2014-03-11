@@ -3,13 +3,38 @@ Tests for `site` module.
 """
 import pytest
 import gerritssh
-import subprocess
+from paramiko.ssh_exception import SSHException
 
 
 @pytest.fixture
-def mocked_output(monkeypatch):
-    def helper(f):
-        monkeypatch.setattr(gerritssh.gerritsite, '_check_output', f)
+def mocked_output(connected_site):
+
+    def helper(f, connected=False):
+        class DummySSHClient(object):
+
+            def __init__(self):
+                self.connected = connected
+
+            def execute(self, command):
+                import io
+                import sys
+                from gerritssh.borrowed.ssh import SSHCommandResult
+                self.connected = True
+
+                cresult = f(command)
+                if sys.version_info[0] < 3:
+                    cresult = unicode(cresult)
+
+                return SSHCommandResult(command,
+                                        io.StringIO(),
+                                        io.StringIO(cresult),
+                                        io.StringIO())
+
+            def disconnect(self):
+                self.connected = False
+
+        connected_site._Site__ssh = DummySSHClient()
+        return connected_site
     return helper
 
 
@@ -28,6 +53,9 @@ class TestGerritssh(object):
         assert s, 'Failed to create a Site object'
         assert s.site == 'gerrit.example.com', \
         'Did not record the site name properly'
+        assert repr(s) == ('<gerritssh.gerritsite.Site'
+                           '(site=gerrit.example.com'
+                           ', connected=False)>')
 
         with pytest.raises(TypeError):
             _ = gerritssh.Site(1)
@@ -44,19 +72,16 @@ class TestGerritssh(object):
 
     def test_failed_connection1(self, mocked_output):
         ''' Mock check_output to throw the CalledProcessError'''
-        s = gerritssh.Site('...')
+        def raiseerror(cmd):
+            raise SSHException('cmd = ' + cmd)
 
-        def raiseerror(a, b=''):
-            raise subprocess.CalledProcessError(255, 'cmd')
-        mocked_output(raiseerror)
+        s = mocked_output(raiseerror)
         with pytest.raises(gerritssh.SSHConnectionError): s.connect()
 
     def test_failed_connection2(self, mocked_output):
         '''Mock check_output to throw TypeError'''
-        s2 = gerritssh.Site('...')
-
-        def raiseerror(a, b=''): raise TypeError()
-        mocked_output(raiseerror)
+        def raiseerror(cmd): raise TypeError('cmd = ' + cmd)
+        s2 = mocked_output(raiseerror)
         with pytest.raises(TypeError): s2.connect()
 
     def test_failed_connection3(self):
@@ -80,14 +105,13 @@ class TestGerritssh(object):
         with pytest.raises(gerritssh.InvalidCommandError):
             connected_site.execute(1)
 
-    def test_execute_string(self, connected_site, mocked_output):
-        s = connected_site
-
-        def echo(a, _=''):
-            return ' '.join(a)
-        mocked_output(echo)
-        assert s.execute('somecommand') == \
-            ' '.join(['ssh', s.site, 'gerrit', 'somecommand'])
+    def test_execute_string(self, mocked_output):
+        def echo(cmd):
+            return cmd.strip()
+        s = mocked_output(echo, connected=True)
+        resp = s.execute('somecommand')
+        assert len(resp) == 1
+        assert resp[0] == ' '.join(['gerrit', 'somecommand'])
 
     def test_execute_cmd(self, connected_site):
         lp = gerritssh.ProjectList()
@@ -118,6 +142,7 @@ class TestGerritssh(object):
 
         s = connected_site
         ev = s.version_at_least
+        v = s.version
         assert ev(1, 0, 0)
         assert ev(1)
         assert ev(1, 0)

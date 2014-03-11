@@ -18,7 +18,7 @@ def test_lp_all():
     '''
     class DummySite(object):
         def execute(self, cmd):
-            return cmd
+            return [cmd]
 
     s = DummySite()
     cmd = misc.ProjectList(True).execute_on(s)
@@ -38,7 +38,7 @@ def test_lp_iter():
 
     '''
     class DummySite:
-        def execute(self, _): return 'p1\np2\n'
+        def execute(self, _): return ['p1', 'p2']
 
     s = DummySite()
     lp = misc.ProjectList()
