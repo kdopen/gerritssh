@@ -1,0 +1,4 @@
+[run]
+omit = gerritssh/borrowed/ssh.py
+
+

@@ -81,6 +81,8 @@ previously mentioned, I really wanted to develop something from scratch.
 It still fails with really large result sets, but does reuse the same SSH connection
 for sequences of commands. 
 
+I have shamelessly borrowed large parts of the ssh module from this library.
+
 python-gerrit
 -------------
 
