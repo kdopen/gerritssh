@@ -61,7 +61,13 @@ class GerritSSHClient(SSHClient):
         self.lock = Lock()
 
     def _configure(self):
-        """ Configure the ssh parameters from the config file. """
+        """
+        Configure the ssh parameters from the config file.
+
+        The Port and username are extracted from .ssh/config, unless
+        overridden by arguments to the constructor.
+
+        """
         configfile = expanduser("~/.ssh/config")
 
         if not isfile(configfile):
@@ -75,11 +81,10 @@ class GerritSSHClient(SSHClient):
         if not data:
             raise SSHException("No ssh config for host %s" % self.hostname)
 
-        if not 'hostname' in data or not 'port' in data or not 'user' in data:
-            raise SSHException("Missing configuration data in %s" % configfile)
+        self.hostname = data.get('hostname', None)
 
-        self.hostname = data['hostname']
-        self.username = data['user']
+        if not self.username:
+            self.username = data.get('user', None)
 
         if 'identityfile' in data:
             key_filename = abspath(expanduser(data['identityfile'][0]))
@@ -89,10 +94,14 @@ class GerritSSHClient(SSHClient):
                                    key_filename)
             self.key_filename = key_filename
 
-        try:
-            self.port = int(data['port'])
-        except ValueError:
-            raise SSHException("Invalid port: %s" % data['port'])
+        if self.port is None:
+            try:
+                self.port = int(data.get('port', '29418'))
+            except ValueError:
+                raise SSHException("Invalid port: %s" % data['port'])
+
+        if not (self.hostname and self.port and self.username):
+            raise SSHException("Missing configuration data in %s" % configfile)
 
     def _do_connect(self):
         """ Connect to the remote. """
