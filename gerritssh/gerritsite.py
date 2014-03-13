@@ -98,6 +98,7 @@ class Site(object):
         if not isinstance(sitename, str):
             raise TypeError('sitename must be a string')
 
+        self.__init_args = (sitename, username, port)
         self.__site = sitename
         self.__ssh_prefix = 'gerrit'
         self.__version = (0, 0, 0)
@@ -106,6 +107,43 @@ class Site(object):
     def __repr__(self):
         return ('<gerritssh.gerritsite.Site(site=%s, connected=%s)>'
                 % (self.site, self.connected))
+
+    def copy(self):
+        '''
+        Construct an unconnected copy of this Site.
+
+        This can be used to create additional Site instances from one
+        which has already been initialized. An obvious use would be to
+        open multiple connections to the same site, from a point in the
+        code which is not aware of the initial values used to identify
+        the Gerrit instance.
+
+        for example::
+
+            # In the command line parsing module
+            site = gerritssh.Site(sitename, username, port).connect()
+            ...
+
+            # In another module:
+            def new_connection(asite):
+                return asite.copy().connect()
+
+        This method is aliased by __copy__ and __deepcopy__ and allows
+        Site objects to be safely used with copy.copy() and copy.deepCopy()
+
+        '''
+        return Site(*self.__init_args)
+
+    # Alias the magic methods used by the copy module
+    __copy__ = copy
+
+    def __deepcopy__(self, memo):
+        '''
+        Deep copies are potentially dangerous. In this case we simply return
+        a new, shallow copy
+
+        '''
+        return self.copy()
 
     def __extract_version(self, vstr):
         results = re.search(r'gerrit version (\d+)\.(\d+)\.(\d+).*$', vstr)

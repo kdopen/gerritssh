@@ -46,7 +46,7 @@ class DummyCommand(gerritssh.SiteCommand):
         super(DummyCommand, self).execute_on(site)
 
 
-class TestGerritssh(object):
+class TestGerritSite(object):
 
     def test_init(self):
         s = gerritssh.Site('gerrit.example.com')
@@ -181,3 +181,13 @@ class TestGerritssh(object):
         js[1] = 1
         with pytest.raises(TypeError):
             c.text_to_json(js)
+
+    def test_copying(self, connected_site):
+        import copy
+        copies = [connected_site.copy(),
+                  copy.copy(connected_site),
+                  copy.deepcopy(connected_site)]
+        for s in copies:
+            assert not s.connected
+            assert s.site == connected_site.site
+            assert s._Site__init_args == connected_site._Site__init_args
