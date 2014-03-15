@@ -21,7 +21,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-""" Gerrit SSH Client. """
+"""
+Gerrit SSH Client.
+
+A thin wrapper/extension of Paramiko's SSHClient class, adding logic
+to parse the standard configuraiton file from ~/.ssh.
+
+It also provides lightweight threading protection to allow a single
+connection to be used by multiple threads.
+
+"""
 
 from os.path import abspath, expanduser, isfile
 import socket
@@ -32,8 +41,17 @@ from paramiko.ssh_exception import SSHException
 
 
 class SSHCommandResult(object):
+    """
+    Represents the results of a command run over SSH.
 
-    """ Represents the results of a command run over SSH. """
+    The three attributes are channels representing the
+    three standard streams.
+
+    :param stdin:  The channel's input channel
+    :param stdout: Standard output channel
+    :param stderr: The error output channel
+
+    """
 
     def __init__(self, command, stdin, stdout, stderr):
         self.command = command
@@ -48,7 +66,14 @@ class SSHCommandResult(object):
 
 class GerritSSHClient(SSHClient):
 
-    """ Gerrit SSH Client, wrapping the paramiko SSH Client. """
+    """
+    Gerrit SSH Client, extending the paramiko SSH Client.
+
+    :param hostname: The host to connect to
+    :param username: The user name to use oin connection
+    :param port:     The port to use
+
+    """
 
     def __init__(self, hostname, username=None, port=None):
         """ Initialise and connect to SSH. """
@@ -66,6 +91,19 @@ class GerritSSHClient(SSHClient):
 
         The Port and username are extracted from .ssh/config, unless
         overridden by arguments to the constructor.
+
+        If username and or port are provided to `__init__`, they will
+        override the values found in the configuration file.
+
+
+        :raise:
+            SSHException under the following conditions:
+
+            * No configuraiton file is found
+            * It does not contain an entry for the Host.
+            * It references a keyfile which does not exist
+            * The port number is non-numeric or negative
+            * Values for port and username can not be determined
 
         """
         configfile = expanduser("~/.ssh/config")
@@ -104,7 +142,12 @@ class GerritSSHClient(SSHClient):
             raise SSHException("Missing configuration data in %s" % configfile)
 
     def _do_connect(self):
-        """ Connect to the remote. """
+        """
+        Actually connect to the remote.
+
+        :raise: SSHException if connection fails.
+
+        """
         self.load_system_host_keys()
 
         if self.username is None or self.port is None:
@@ -136,12 +179,13 @@ class GerritSSHClient(SSHClient):
     def execute(self, command):
         """ Run the given command.
 
-        Make sure we're _connected to the remote server, and run `command`.
+        Ensure we're _connected to the remote server, and run `command`.
 
-        Return the results as a `SSHCommandResult`.
+        :return: the results as an `SSHCommandResult`.
 
-        Raise `ValueError` if `command` is not a string, or `SSHException` if
-        command execution fails.
+        :raise:
+            `ValueError` if `command` is not a string, or `SSHException` if
+            command execution fails.
 
         """
         if not isinstance(command, str):
@@ -161,9 +205,19 @@ class GerritSSHClient(SSHClient):
 
     @property
     def connected(self):
+        '''
+        Does the client have an open conection?
+
+        :return: True if the client is connected
+        '''
         return self.__connected.is_set()
 
     def disconnect(self):
+        '''
+        Close any open connection
+
+        :return: self to allow chaining
+        '''
         self.lock.acquire()
 
         try:

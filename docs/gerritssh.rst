@@ -1,6 +1,13 @@
 gerritssh package
 =================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    gerritssh.borrowed
+
 Submodules
 ----------
 

@@ -75,7 +75,7 @@ Planned Features
 
   * Implement queries such as examining the audit trail on group membership
   
-  * Wrapping generation of properly quotes SQL statements
+  * Wrapping generation of properly quoted SQL statements
   
   * Extract the SCHEMA information with a ``\d`` command and dynamically
     clone the database into a memory-resident sqlite database.
