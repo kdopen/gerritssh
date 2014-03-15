@@ -166,9 +166,11 @@ class GerritSSHClient(SSHClient):
     def disconnect(self):
         self.lock.acquire()
 
-        if self.connected():
-            self.close()
-            self.__connected.clear()
+        try:
+            if self.connected():
+                self.close()
+                self.__connected.clear()
+        finally:
+            self.lock.release()
 
-        self.lock.release()
         return self
