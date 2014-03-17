@@ -375,37 +375,52 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
         Execute the command on the given site
 
         This method must be overridden in concrete classes, and thus the
-        base class implementation guaranteed to raise an exception.
+        base class implementation is guaranteed to raise an exception.
 
         :raises: TypeError
         '''
 
     @staticmethod
-    def text_to_list(text, nonempty=False):
+    def text_to_list(text_or_list, nonempty=False):
         r'''
         Split a single string containing embedded newlines into a list
         of trimmed strings
 
-        Useful for cleaning up multi-line output from commands.
+        Useful for cleaning up multi-line output from commands. Note that
+        a list of strings (perhaps the output from multiple commands)
+        will be flattened to a single list.
 
-        :param str text: String with embedded newlines
+        :param str text_or_list:
+            Either a string with embedded newlines, or a list or tuple of
+            strings with embedded newlines.
         :param bool nonempty:
             If true, all empty lines will be removed from the output.
 
-        :returns [str]: List of stripped strings, one string per embedded line.
-        :raises: :exc:`TypeError` if `text` is not a string
+        :returns [str]:
+            List of stripped strings, one string per embedded line.
+        :raises:
+            :exc:`TypeError` if `text_or_list` contains anything other than
+            strings.
 
         Usage::
             >>> SiteCommand.text_to_list('a\n \nb')
             ['a', '', 'b']
             >>> SiteCommand.text_to_list('a\n \nb\n', True)
             ['a', 'b']
+            >>> SiteCommand.text_to_list(['a\nb','c\nd'])
+            ['a','b','c','d']
 
         '''
-        if not isinstance(text, str):
-            raise TypeError('Argument must be a string')
+        if isinstance(text_or_list, str):
+            text_or_list = [text_or_list]
+
+        if not (isinstance(text_or_list, collections.Iterable) and
+                all([isinstance(x, str) for x in text_or_list])):
+            raise TypeError('Argument must be a string or list of strings')
+
         stripempty = lambda x: x if nonempty else True
-        stripped_list = [l.strip() for l in text.splitlines()]
+        stripped_list = [l.strip() for s in text_or_list
+                         for l in s.splitlines()]
         return [l for l in stripped_list if stripempty(l)]
 
     @staticmethod
@@ -424,7 +439,7 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
             each string JSON.
         :raises:
             :exc:`TypeError` if text_or_list` is not one or more strings or if
-            one of the strings can't be decode as valid JSON.
+            one of the strings can't be decoded as valid JSON.
 
         '''
         if isinstance(text_or_list, str):

@@ -168,8 +168,14 @@ class TestGerritSite(object):
         assert c.text_to_list('string') == ['string']
         assert c.text_to_list('a\nb') == ['a', 'b']
         assert gerritssh.SiteCommand.text_to_list('string') == ['string']
+        assert gerritssh.SiteCommand.text_to_list('a\n \nb') == ['a', '', 'b']
+        assert (gerritssh.SiteCommand.text_to_list('a\n \nb\n', True)
+                 == ['a', 'b'])
+        assert (gerritssh.SiteCommand.text_to_list(['a\nb', 'c\nd'])
+                == ['a', 'b', 'c', 'd'])
 
-        with pytest.raises(TypeError): c.text_to_list(c)
+        with pytest.raises(TypeError): c.text_to_list(123)
+        with pytest.raises(TypeError): c.text_to_list(['abc', 123, 'def'])
         with pytest.raises(TypeError): c.text_to_list(None)
 
     def test_t2j(self):
