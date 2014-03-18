@@ -21,9 +21,8 @@ Indirect Contributors
 
 * Scott K Maxwell for providing a cross-version branch of Paramiko. This is
   available at https://github.com/scottkmaxwell/paramiko/tree/py3-support-without-py25.
-  It is now actively being worked on, and will hopefully merge to master in
-  the near future.
-
+  This has now been merged to master in the main paramiko repository and should
+  be included in v1.14 of paramiko.
 
 Direct Contributors
 -------------------

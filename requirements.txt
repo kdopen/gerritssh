@@ -1,2 +1,1 @@
-
-git+git://github.com/scottkmaxwell/paramiko.git@py3-support-without-py25
+git+git://github.com/paramiko/paramiko.git@master
