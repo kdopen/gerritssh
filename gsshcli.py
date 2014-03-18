@@ -62,7 +62,7 @@ def query_cmd(site, args):
     b = 'branch:{0}'.format(args.branch) if args.branch else ''
     p = 'project:{0}'.format(args.project) if args.project else ''
     s = 'status:{0}'.format(args.qstatus) if args.qstatus else ''
-    q = ' '.join(args.querystring)
+    q = ' '.join(args.querystring) if args.querystring else ''
     q = gssh.Query(' '.join([b, p, s, q]), max_results=args.maxresults or 0)
     log.debug('Executing query command {0} on {1}'.format(q._Query__query,
                                                           site.site))
