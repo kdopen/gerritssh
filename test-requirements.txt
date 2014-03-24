@@ -1,8 +1,8 @@
 ipython
-Sphinx==1.2
-coverage==3.7.1
-pytest==2.5.1
-tox==1.6.1
+Sphinx>=1.2
+coverage>=3.7.1
+pytest>=2.5.1
+tox>=1.6.1
 flake8
 pep8-naming
 
