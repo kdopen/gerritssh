@@ -65,7 +65,7 @@ class TestGerritSite(object):
         s = connected_site
         v = s.version
         c = s.connected
-        assert v == (1, 0, 0), 'Failed to retrieve version string'
+        assert str(v) == '1.0.0'
         assert c, 'Not connected'
         s.connect()  # SHould not raise any problems
         assert s.connected, 'Second call to connect() changed state'
@@ -123,31 +123,31 @@ class TestGerritSite(object):
     def test_extract_version(self):
         s = gerritssh.Site('...')
         ev = s._Site__extract_version
-        assert ev('gerrit version 1') == (0, 0, 0)
-        assert ev('gerrit version 1.2') == (0, 0, 0)
-        assert ev('gerrit version 1.2.3') == (1, 2, 3)
-        assert ev('gerrit version 1-2ab') == (0, 0, 0)
-        assert ev('gerrit version 1ab') == (0, 0, 0)
-        assert ev('gerrit version abc') == (0, 0, 0)
-        assert ev('g') == (0, 0, 0)
-        assert ev('gerrit  1.2.3') == (0, 0, 0)
-        assert ev('gerrit version 1 2 3') == (0, 0, 0)
-        assert ev('gerrit version 1 abc 2') == (0, 0, 0)
-        assert ev('gerrit version 1.2.3abcd') == (1, 2, 3)
-        assert ev('gerrit version 2.4.4-14-gab7f4c1') == (2, 4, 4)
+        assert ev('gerrit version 1') == '0.0.0'
+        assert ev('gerrit version 1.2') == '0.0.0'
+        assert ev('gerrit version 1.2.3') == '1.2.3'
+        assert ev('gerrit version 1-2ab') == '0.0.0'
+        assert ev('gerrit version 1ab') == '0.0.0'
+        assert ev('gerrit version abc') == '0.0.0'
+        assert ev('g') == '0.0.0'
+        assert ev('gerrit  1.2.3') == '0.0.0'
+        assert ev('gerrit version 1 2 3') == '0.0.0'
+        assert ev('gerrit version 1 abc 2') == '0.0.0'
+        assert ev('gerrit version 1.2.3abcd') == '1.2.3'
+        assert ev('gerrit version 2.4.4-14-gab7f4c1') == '2.4.4'
 
     def test_version_compare(self, connected_site):
         with pytest.raises(gerritssh.SSHConnectionError):
-            gerritssh.Site('...').version_at_least(1)
+            gerritssh.Site('...').version_in('>=2.4')
 
         s = connected_site
-        ev = s.version_at_least
-        v = s.version
-        assert ev(1, 0, 0)
-        assert ev(1)
-        assert ev(1, 0)
-        assert not ev(1, 1)
-        assert ev(0, 9, 1)
+        ev = s.version_in
+        v = s.version  # unused but useful if test fails
+        assert ev('==1.0.0')
+        assert ev('>=1')
+        assert ev('==1.0')
+        assert not ev('==1.1')
+        assert ev('>=0.9,<=1.1')
 
     def test_not_connected(self, connected_site):
         connected_site.disconnect()

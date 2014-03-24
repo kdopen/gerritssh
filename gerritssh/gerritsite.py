@@ -47,6 +47,7 @@ import json
 import collections
 import abc
 
+import semantic_version as SV
 
 from gerritssh import GerritsshException
 from gerritssh.borrowed import ssh
@@ -101,7 +102,7 @@ class Site(object):
         self.__init_args = (sitename, username, port)
         self.__site = sitename
         self.__ssh_prefix = 'gerrit'
-        self.__version = (0, 0, 0)
+        self.__version = SV.Version('0.0.0')
         self.__ssh = ssh.GerritSSHClient(sitename, username, port)
 
     def __repr__(self):
@@ -146,9 +147,9 @@ class Site(object):
         return self.copy()
 
     def __extract_version(self, vstr):
-        results = re.search(r'gerrit version (\d+)\.(\d+)\.(\d+).*$', vstr)
-        vnums = results.groups() if results else (0, 0, 0)
-        return tuple(int(s) for s in vnums) if len(vnums) == 3 else (0, 0, 0)
+        results = re.search(r'gerrit version (\d+\.\d+\.\d+).*$', vstr)
+        ver = results.groups()[0] if results else '0.0.0'
+        return ver
 
     def __do_command(self, command, args=''):
         '''
@@ -186,7 +187,7 @@ class Site(object):
             raise SSHConnectionError('Failed to connect to ' + self.site)
 
         _logger.debug('Connected OK: resp: {0}'.format(resp[0].strip()))
-        self.__version = self.__extract_version(resp[0])
+        self.__version = SV.Version(self.__extract_version(resp[0]))
         return self
 
     def disconnect(self):
@@ -254,17 +255,48 @@ class Site(object):
         After connection, provides the version of Gerrit running on the site.
 
         :returns:
-            A tuple containing the (major,minor,patch) values extracted from
-            the response to a 'gerrit version' command.
+            A semantic_version Version object containing the values extracted
+            from the response to a 'gerrit version' command.
 
             Before connecting, or if a valid version number can not be found
-            in the response from Gerrit, it has the value (0,0,0).
+            in the response from Gerrit, it has the value '0.0.0'.
 
         This needs to be an immutable attribute of the instance once
         it is created,hence the definition of a 'read-only' property.
 
         '''
         return self.__version
+
+    def version_in(self, constraint):
+        '''
+        Does the site's version match a constraint specifier.
+
+        Client's are free to roll their own tests, but this
+        method makes it unnecessary for them to actually import
+        the semantic_version module directly.
+
+        :param str constraint:
+            A requirement specification conforming to the Semantic
+            Version package's documentation at
+
+            http://pythonhosted.org//semantic_version/#requirement-specification
+
+        :returns: True if the site's version satisfies the requirement.
+        :raises: SSHConnectionError if there is no active connection
+
+        Usage::
+            s=Site('example.gerrit.com').connect()
+            # Check that the site is running Gerrit 2.5 or later
+            s.version_in('>=2.5')
+            # Check that the site is running 2.6, 2.7, or 2.8
+            s.version_in('>=2.6,<2.9')
+
+        '''
+        if not self.connected:
+            raise SSHConnectionError('Site is not connected')
+
+        spec = SV.Spec(constraint)
+        return self.version in spec
 
     def version_at_least(self, major, minor=0, patch=0):
         '''

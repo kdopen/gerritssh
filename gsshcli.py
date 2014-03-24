@@ -48,7 +48,7 @@ def connect_to_site(site):
 
 def version_cmd(site, args):
     ''' Print the version of Gerrit running on the connected Site '''
-    vstr = '{0}.{1}.{2}'.format(*site.version)
+    vstr = str(site.version)
     print('{0} is running version {1} of Gerrit'.format(site.site,
                                                         vstr))
     return 0

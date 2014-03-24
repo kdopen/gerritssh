@@ -5,6 +5,8 @@ Pytest test fixtures used in the various unit tess contained in other modules.
 
 import pytest
 import gerritssh
+import semantic_version as SV
+
 from gerritssh.borrowed.ssh import SSHCommandResult
 
 
@@ -45,7 +47,7 @@ def connected_site(monkeypatch):
     assert not s.connected, 'Thinks its connected after construction'
     s.connect()
     assert s.connected
-    assert s.version == (1, 0, 0)
+    assert s.version == SV.Version('1.0.0')
     return s
 
 '''
