@@ -1,1 +1,3 @@
 git+git://github.com/paramiko/paramiko.git@master
+semantic-version
+
