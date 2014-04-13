@@ -48,26 +48,19 @@ Features
 * Makes the results of those commands available to the programmer in a
   format which is more natural for Python programmers to manipulate.
 
+* Is aware of which combinations of commands and versions are supported
+  for versions of Gerrit from 2.4 through 2.8.
+  
+* Supports Python 2.6, 2.7, 3.3, and 3.4
+
 * Uses a version of paramiko which supports Python 2 and 3.
    
 Planned Features
 ----------------
 
-* Support the latest commands for Gerrit v2.8 (such as ls-members)
+* Support a broad range of commands including the latest commands for Gerrit
+  v2.8 (such as ls-members)
 
-* Manage command variants for different Gerrit versions using the
-  version_at_least() method of Site.
-  
-  * The first major task is to actually identify which commands and
-    options are supported in each version from 2.4 through 2.8
-    
-  * A simple step is then to condition entire commands on the Gerrit
-    version.
-    
-  * The major work is then to condition individual options on each
-    command. For example, ls-projects does not support the JSON format
-    until version 2.5.
-    
 * Add a module to operate on sets of Review objects to perform more
   complex searches, such as building dependency graphs of open reviews.
   

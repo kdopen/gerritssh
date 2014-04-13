@@ -79,7 +79,7 @@ def query_cmd(site, args):
 
 def lp_cmd(site, args):
     ''' List the projects on the connected Site '''
-    lp = gssh.ProjectList(args.listall)
+    lp = gssh.ProjectList('--all' if args.listall else '')
     lp.execute_on(site)
     for p in lp:
         print(p)

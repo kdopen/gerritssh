@@ -17,7 +17,7 @@ def connected_site(monkeypatch):
     execute a command acts as if a 'gerrit version' command had been executed.
 
     In essence it provides a properly constructed Site object which will report
-    a version of 1.0.0 and a site of 'gerrit.example.com.
+    a version of 2.9.0 and a site of 'gerrit.example.com.
 
     '''
 #     monkeypatch.setattr(gerritssh.Site, '_Site__do_command',
@@ -34,7 +34,7 @@ def connected_site(monkeypatch):
             result = SSHCommandResult(command,
                                       io.StringIO(),
                                       io.StringIO(u'gerrit version '
-                                                  '1.0.0\n'),
+                                                  '2.9.0\n'),
                                       io.StringIO())
 
             return result
@@ -47,7 +47,7 @@ def connected_site(monkeypatch):
     assert not s.connected, 'Thinks its connected after construction'
     s.connect()
     assert s.connected
-    assert s.version == SV.Version('1.0.0')
+    assert s.version == SV.Version('2.9.0')
     return s
 
 '''

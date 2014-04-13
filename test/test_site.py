@@ -65,7 +65,7 @@ class TestGerritSite(object):
         s = connected_site
         v = s.version
         c = s.connected
-        assert str(v) == '1.0.0'
+        assert str(v) == '2.9.0'
         assert c, 'Not connected'
         s.connect()  # SHould not raise any problems
         assert s.connected, 'Second call to connect() changed state'
@@ -118,7 +118,7 @@ class TestGerritSite(object):
         p = connected_site.execute(lp)
         assert p
         assert len(p) == 1
-        assert p[0] == 'gerrit version 1.0.0'
+        assert p[0] == 'gerrit version 2.9.0'
 
     def test_extract_version(self):
         s = gerritssh.Site('...')
@@ -138,16 +138,16 @@ class TestGerritSite(object):
 
     def test_version_compare(self, connected_site):
         with pytest.raises(gerritssh.SSHConnectionError):
-            gerritssh.Site('...').version_in('>=2.4')
+            gerritssh.Site('...').version_in('>=2.10')
 
         s = connected_site
         ev = s.version_in
         v = s.version  # unused but useful if test fails
-        assert ev('==1.0.0')
-        assert ev('>=1')
-        assert ev('==1.0')
+        assert ev('==2.9.0')
+        assert ev('>=2')
+        assert ev('==2.9')
         assert not ev('==1.1')
-        assert ev('>=0.9,<=1.1')
+        assert ev('>=1.9,<=3.1')
 
     def test_not_connected(self, connected_site):
         connected_site.disconnect()

@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     gerritssh.borrowed
+    gerritssh.internal
 
 Submodules
 ----------

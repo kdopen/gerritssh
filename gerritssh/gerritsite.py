@@ -279,7 +279,7 @@ class Site(object):
             A requirement specification conforming to the Semantic
             Version package's documentation at
 
-            http://pythonhosted.org//semantic_version/#requirement-specification
+            http://pythonhosted.org/semantic_version/#requirement-specification
 
         :returns: True if the site's version satisfies the requirement.
         :raises: SSHConnectionError if there is no active connection
@@ -297,24 +297,6 @@ class Site(object):
 
         spec = SV.Spec(constraint)
         return self.version in spec
-
-    def version_at_least(self, major, minor=0, patch=0):
-        '''
-        Compare the version of the connected site and return true if it
-        is greater than or equal to the provided tuple.
-
-        Useful in supporting specific versions of Gerrit.
-
-        :param (major,minor,patch): The version to use in the comparison.
-
-        :returns: A Boolean result of the comparison.
-        :raises: SSHConnectionError if there is no connection
-
-        '''
-        if not self.connected:
-            raise SSHConnectionError('Site is not connected')
-
-        return self.version >= (major, minor, patch)
 
     @property
     def connected(self):
