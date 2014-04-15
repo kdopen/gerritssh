@@ -1,8 +1,8 @@
-ipython
-Sphinx>=1.2
+ipython>=2.0.0
+Sphinx>=1.2.2
 coverage>=3.7.1
-pytest>=2.5.1
-tox>=1.6.1
-flake8
-pep8-naming
-
+pytest>=2.5.2
+tox>=1.7.1
+flake8>=2.1.0
+#pep8-naming>=0.2.2
+git+git://github.com/kdopen/pep8-naming@master
