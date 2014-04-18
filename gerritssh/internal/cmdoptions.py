@@ -160,8 +160,8 @@ class ParsedOptions(object):
         '''
         # no dict comprehensions in 2.6
         results = dict([(k, v)
-                   for k, v in self.__dict__.items()
-                   if not k.startswith('_')])
+                        for k, v in self.__dict__.items()
+                        if not k.startswith('_')])
 
         strs = []
         for opt in self._option_set:
@@ -198,7 +198,7 @@ class ParsedOptions(object):
             if not (spec and self.__dict__[opt.key]):
                 continue
 
-            if not version in SV.Spec(spec):
+            if version not in SV.Spec(spec):
                 return False
 
         return True
