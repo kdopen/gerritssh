@@ -36,4 +36,4 @@ logging.getLogger(__name__).addHandler(__nullh)
 from .gerritsite import *  # noqa - inhibit F403
 from .query import *  # noqa - inhibit F403
 from .review import *  # noqa - inhibit F403
-from .misc import *  # noqa - inhibit F403
+from .lsprojects import *  # noqa - inhibit F403

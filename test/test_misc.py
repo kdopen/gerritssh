@@ -1,9 +1,9 @@
 '''
-Tests for the miscellaneous commands contained in the misc module.
+Tests for the miscellaneous commands contained in the lsprojects module.
 
 '''
 
-from gerritssh import misc
+from gerritssh.lsprojects import ProjectList
 from gerritssh import Site
 import pytest
 import semantic_version as SV
@@ -42,10 +42,10 @@ def test_lp_all(dummy_site):
 
     '''
     s = dummy_site(lambda x: [x], '2.7.0')
-    cmd = misc.ProjectList('--all').execute_on(s)
+    cmd = ProjectList('--all').execute_on(s)
     assert len(cmd) == 1
     assert cmd[0] == 'ls-projects --all'
-    cmd = misc.ProjectList().execute_on(s)
+    cmd = ProjectList().execute_on(s)
     assert len(cmd) == 1
     assert cmd[0] == 'ls-projects'
 
@@ -59,7 +59,7 @@ def test_lp_iter(dummy_site):
 
     '''
     s = dummy_site(lambda _: ['p1', 'p2'], '2.7.0')
-    lp = misc.ProjectList()
+    lp = ProjectList()
     r = lp.execute_on(s)
     assert r == ['p1', 'p2']
     for i, p in enumerate(lp):
@@ -68,7 +68,7 @@ def test_lp_iter(dummy_site):
 
 def test_lp_not_supported(dummy_site):
     s = dummy_site(lambda x: [x], '2.0.0')
-    lp = misc.ProjectList()
+    lp = ProjectList()
 
     with pytest.raises(NotImplementedError):
         lp.execute_on(s)
@@ -77,7 +77,7 @@ def test_lp_not_supported(dummy_site):
 def test_lp_not_supported_option(dummy_site):
 
     s = dummy_site(lambda x: [x], '2.4.7')
-    lp = misc.ProjectList('-d')
+    lp = ProjectList('-d')
 
     with pytest.raises(NotImplementedError):
         lp.execute_on(s)
