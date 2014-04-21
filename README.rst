@@ -53,10 +53,11 @@ Features
   
 * Supports Python 2.6, 2.7, 3.3, and 3.4
 
-* Uses a version of paramiko which supports Python 2 and 3.
-   
+
 Planned Features
 ----------------
+
+* Support options-versioning on the query command
 
 * Support a broad range of commands including the latest commands for Gerrit
   v2.8 (such as ls-members)
