@@ -54,6 +54,26 @@ def version_cmd(site, args):
     return 0
 
 
+def reconstitute(args):
+    res = []
+    for key, value in args.__dict__.items():
+        if key in ['help', 'verbose', 'site', 'operation']:
+            continue
+
+        if not value:
+            continue
+
+        keystr = '--' + key.replace('_', '-')
+        if value == True:
+            res.append(keystr)
+        elif isinstance(value, list):
+            allf = [' '.join([keystr, v]) for v in value]
+            res.append(' '.join(allf))
+        else:
+            res.append(' '.join([keystr, value]))
+    return ' '.join(res).strip()
+
+
 def query_cmd(site, args):
     '''
     Execute the query command and print out the results
@@ -79,7 +99,7 @@ def query_cmd(site, args):
 
 def lp_cmd(site, args):
     ''' List the projects on the connected Site '''
-    lp = gssh.ProjectList('--all' if args.listall else '')
+    lp = gssh.ProjectList(reconstitute(args))
     lp.execute_on(site)
     for p in lp:
         print(p)
@@ -156,6 +176,24 @@ def parse_command_line():
     lp_parser.add_argument('-a', '--all', dest='listall',
                            action='store_true', default=False,
                            help='List all project types')
+    lp_parser.add_argument('-b', '--show-branch', dest='show_branch',
+                           action='append',
+                           help='Show SHA for head of branch')
+    lp_parser.add_argument('--type', choices=['code', 'permissions', 'all'],
+                           help='Restrict the type of projects returned')
+    lp_parser.add_argument('--format',
+                           choices=['json', 'text', 'json_compact'],
+                           help='specify the return type for the command')
+    lp_parser.add_argument('--limit', dest='limit', action='store', nargs=1,
+                           help='Limit the number of projects returned')
+    lp_parser.add_argument('--has-acl-for', action='store', dest='has_acl_for',
+                           help='Only show projects with ACL for named group')
+    g = lp_parser.add_mutually_exclusive_group()
+    g.add_argument('-d', '--description',
+                           action='store_true', default=False,
+                           help='Return the project description')
+    g.add_argument('-t', '--tree', action='store_true',
+                   help='Display project inheritance')
 
     query_parser = subparsers.add_parser('query',
                                          help='Search for reviews')
@@ -194,4 +232,6 @@ def parse_command_line():
 
 if __name__ == "__main__":
     args = parse_command_line()
+    log.debug(args)
+    log.debug(reconstitute(args))
     execute(args)
