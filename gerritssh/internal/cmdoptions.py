@@ -8,7 +8,7 @@ is supported. Thus, a command implementation can not only parse its
 option list with ease, but also identify combinations which are not
 supported by the site they are being sent to.
 
-Implementing a verisoned command has the following requirements (see
+Implementing a versioned command has the following requirements (see
 the `ProjectList` command for a full implementation).
 
 * Create an OptionSet instance, specify all the supported options. This
@@ -61,8 +61,12 @@ A complete framework for a command implementation might look like::
 import collections
 import shlex
 import argparse
+import logging
 
 import semantic_version as SV
+
+
+_logger = logging.getLogger(__name__)
 
 
 class OptionRepr(collections.namedtuple('__OptionRepr',
@@ -144,6 +148,7 @@ class ParsedOptions(object):
     def __init__(self, option_set, parser, opt_str):
         self._option_set = option_set
         results = parser.parse_args(shlex.split(opt_str)).__dict__
+        _logger.debug('Parsed "%s" to %s' % (opt_str, str(results)))
         self.__dict__.update(results)
 
     def __str__(self):
@@ -199,6 +204,8 @@ class ParsedOptions(object):
                 continue
 
             if version not in SV.Spec(spec):
+                _logger.debug('Option %s not supported in %s. Spec: %s'
+                              % (opt.key, str(version), str(spec)))
                 return False
 
         return True
