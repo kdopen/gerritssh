@@ -2,34 +2,8 @@
 Tests for the miscellaneous commands contained in the lsprojects module.
 
 '''
-
 from gerritssh.lsprojects import ProjectList
-from gerritssh import Site
 import pytest
-import semantic_version as SV
-
-
-@pytest.fixture
-def dummy_site():
-    def f(exec_func, version):
-        class DummySite(Site):
-
-            def __init__(self):
-                super(DummySite, self).__init__('gerrit.example.com')
-
-            def execute(self, cmd):
-                return exec_func(cmd)
-
-            @property
-            def version(self):
-                return SV.Version(version)
-
-            @property
-            def connected(self):
-                return True
-
-        return DummySite()
-    return f
 
 
 def test_lp_all(dummy_site):

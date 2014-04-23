@@ -50,6 +50,30 @@ def connected_site(monkeypatch):
     assert s.version == SV.Version('2.9.0')
     return s
 
+
+@pytest.fixture
+def dummy_site():
+    def f(exec_func, version):
+        class DummySite(gerritssh.Site):
+
+            def __init__(self):
+                super(DummySite, self).__init__('gerrit.example.com')
+
+            def execute(self, cmd):
+                return exec_func(cmd)
+
+            @property
+            def version(self):
+                return SV.Version(version)
+
+            @property
+            def connected(self):
+                return True
+
+        return DummySite()
+    return f
+
+
 '''
 The file 'testreview.json' contains the result of a query for a (randomly
 chosen) open code review at review.openstack.org. It is used within numerous
