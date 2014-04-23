@@ -143,6 +143,8 @@ class ParsedOptions(object):
     :param opt_str:
         The string of options to be parsed
 
+    :raises" `SystemExit` if any of the options fail to parse
+
     '''
 
     def __init__(self, option_set, parser, opt_str):

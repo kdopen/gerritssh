@@ -83,13 +83,14 @@ def query_cmd(site, args):
     p = 'project:{0}'.format(args.project) if args.project else ''
     s = 'status:{0}'.format(args.qstatus) if args.qstatus else ''
     q = ' '.join(args.querystring) if args.querystring else ''
-    q = gssh.Query(' '.join([b, p, s, q]), max_results=args.maxresults or 0)
-    log.debug('Executing query command {0} on {1}'.format(q._Query__query,
+    qry = gssh.Query('', ' '.join([b, p, s, q]),
+                     max_results=args.maxresults or 0)
+    log.debug('Executing query command {0} on {1}'.format(qry._Query__query,
                                                           site.site))
-    q.execute_on(site)
+    qry.execute_on(site)
 
     last_project = ''
-    for r in sorted(q, key=lambda rvw: ' '.join([rvw.project, rvw.ref])):
+    for r in sorted(qry, key=lambda rvw: ' '.join([rvw.project, rvw.ref])):
         if r.project != last_project:
             print('\n{0}:'.format(r.project))
             last_project = r.project

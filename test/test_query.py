@@ -4,6 +4,7 @@ Unit tests for classes and methods in the gerritssh.query module.
 '''
 import pytest
 import gerritssh as gssh
+import semantic_version as SV
 
 
 def test_init():
@@ -17,6 +18,23 @@ def test_init():
     assert q.results == []
 
 
+def test_versioning(dummy_site):
+    s = dummy_site(lambda x: x, '2.0.0')
+    assert s.version == SV.Version('2.0.0')
+    with pytest.raises(SystemExit):
+        gssh.Query('--badoption', '')
+
+    # Command is not implemented
+    q = gssh.Query('')
+    with pytest.raises(NotImplementedError):
+        q.execute_on(s)
+
+    s = dummy_site(lambda x: x, '2.4.0')
+    q = gssh.Query('--all-reviewers')
+    with pytest.raises(NotImplementedError):
+        q.execute_on(s)  # Option not implemented in 2.4
+
+
 def test_execute(open_review_text, open_review):
     responses = [open_review_text, '']
 
@@ -24,6 +42,7 @@ def test_execute(open_review_text, open_review):
     # code reviews. Each instance will return the value of the
     # responses variable, which should be a list of one or more
     # open-review_text fixtures.
+
     class DummySite(gssh.Site):
         def __init__(self, site):
             super(DummySite, self).__init__(site)
@@ -33,9 +52,17 @@ def test_execute(open_review_text, open_review):
             assert type(cmd) == type('abc')
             return next(self.gen)
 
+        @property
+        def version(self):
+            return SV.Version('2.9.0')
+
+        @property
+        def connected(self):
+            return True
+
     # Execute a dummied query and examine the response
     s = DummySite('...')
-    q = gssh.Query('status:open', 100)
+    q = gssh.Query('', 'status:open', 100)
     r = q.execute_on(s)
     assert type(r) == type([])
     assert len(r) == 1

@@ -57,8 +57,6 @@ Features
 Planned Features
 ----------------
 
-* Support options-versioning on the query command
-
 * Support a broad range of commands including the latest commands for Gerrit
   v2.8 (such as ls-members)
 

@@ -26,6 +26,7 @@ import logging
 
 from . import review
 from .gerritsite import SiteCommand
+from .internal.cmdoptions import *  # noqa
 
 _logger = logging.getLogger(__name__)
 
@@ -34,8 +35,24 @@ class Query(SiteCommand):
     '''
     Command to execute queries on reviews
 
+    :param option_str:
+        One or more supported options to be passed to the command
+
+        :note: In order to ensure that the necessary information is returned
+               to allow creation of the `Review` objects, many of the options
+               will be overridden by `execute_on`. The following will always
+               be sent:
+
+               * --current-patch-set
+               * --patch-sets
+               * --all-approvals
+               * --dependencies
+               * --commit-message
+               * --format JSON
+
     :param query:
         arguments to the query commands, e.g. 'status:abandoned owner:self'
+
     :param max_results:
         limit the result set to the first 'n'. If not given, all results
         are returned. This may require multiple commands being sent to the
@@ -44,10 +61,28 @@ class Query(SiteCommand):
 
     '''
 
-    def __init__(self, query='', max_results=0):
+    __options = OptionSet(
+        Option.choice('format', choices=['json', 'text']),
+        Option.flag('current-patchset'),
+        Option.flag('patch-sets'),
+        Option.flag('all-approvals'),
+        Option.flag('files'),
+        Option.flag('comments'),
+        Option.flag('dependencies'),
+        Option.flag('submit-records', spec='>=2.5'),
+        Option.flag('commit-message', spec='>=2.5'),
+        Option.flag('all-reviewers', spec='>=2.9')
+        )
+
+    __supported_versions = '>=2.4'
+
+    def __init__(self, option_str='', query='', max_results=0):
         super(Query, self).__init__()
         self.__query = query
         self.__max_results = max_results
+        self.__parser = CmdOptionParser(Query.__options)
+        self.__option_str = option_str
+        self.__parsed_options = self.__parser.parse(option_str)
 
     def execute_on(self, the_site):
         '''
@@ -59,19 +94,32 @@ class Query(SiteCommand):
 
         '''
 
+        not_supported = (
+            'Gerrit version {0} does not support '.format(the_site.version)
+            )
+
+        if not the_site.version_in(Query.__supported_versions):
+            raise NotImplementedError(not_supported + 'this command')
+
+        if not self.__parsed_options.supported_in(the_site.version):
+            raise NotImplementedError(not_supported +
+                                      'one or more options provided')
+
+        # Set the options we require in order to parse the results.
+        opts = self.__parsed_options
+        opts.current_patch_set = True
+        opts.patch_sets = True
+        opts.all_approvals = True
+        opts.dependencies = True
+        opts.commit_message = True
+        opts.format = 'JSON'
         result, resume_key, remaining = [], '', self.__max_results
 
         def partial_query():
             '''Helper to perform a single sub-query'''
             resume = ('resume_sortkey:{0}'.format(resume_key)
                       if resume_key else '')
-            standard_flags = ' '.join(['--current-patch-set',
-                                       '--patch-sets',
-                                       '--all-approvals',
-                                       '--dependencies',
-                                       '--commit-message',
-                                       '--format=JSON',
-                                       resume])
+            standard_flags = ' '.join([str(opts), resume])
             limit = 'limit:{0}'.format(remaining) if self.__max_results else ''
             raw = the_site.execute(' '.join(['query', limit,
                                              self.__query,
@@ -114,7 +162,7 @@ def _reviews_by_status(project, branch, max_results, status):
     flags = [format_option('project', project),
              format_option('branch', branch),
              format_option('status', status)]
-    return Query(' '.join(flags), max_results)
+    return Query('', ' '.join(flags), max_results)
 
 
 def open_reviews(project=None, branch=None, max_results=0):
