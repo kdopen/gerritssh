@@ -20,6 +20,14 @@ gerritssh.gerritsite module
     :undoc-members:
     :show-inheritance:
 
+gerritssh.lsgroups module
+-------------------------
+
+.. automodule:: gerritssh.lsgroups
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gerritssh.lsprojects module
 ---------------------------
 
