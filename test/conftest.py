@@ -11,7 +11,7 @@ from gerritssh.borrowed.ssh import SSHCommandResult
 
 
 @pytest.fixture()
-def connected_site(monkeypatch):
+def connected_site():
     '''
     This fixture provides a Site object, monkeypatched so that any attempt to
     execute a command acts as if a 'gerrit version' command had been executed.
@@ -20,9 +20,6 @@ def connected_site(monkeypatch):
     a version of 2.9.0 and a site of 'gerrit.example.com.
 
     '''
-#     monkeypatch.setattr(gerritssh.Site, '_Site__do_command',
-#                         lambda self, cmd: self._Site__ssh.execute(cmd))
-
     class DummySSHClient(object):
 
         def __init__(self, *args, **kwargs):

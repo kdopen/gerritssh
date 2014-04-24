@@ -48,6 +48,7 @@ def connect_to_site(site):
 
 def version_cmd(site, args):
     ''' Print the version of Gerrit running on the connected Site '''
+    log.debug('Version command called with args: ' + str(args))
     vstr = str(site.version)
     print('{0} is running version {1} of Gerrit'.format(site.site,
                                                         vstr))

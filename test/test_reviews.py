@@ -73,7 +73,7 @@ def test_properties(open_review, open_review_json):
     assert r.raw == orj
     _ = r.summary
     _ = r.SHA1
- #   _ = r.parents  # Not in test data
+#   _ = r.parents  # Not in test data
     _ = r.repo_name
     _ = r.number
     _ = r.url
