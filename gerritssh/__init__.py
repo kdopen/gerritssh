@@ -38,4 +38,5 @@ from .query import *  # noqa - inhibit F403
 from .review import *  # noqa - inhibit F403
 from .lsprojects import *  # noqa - inhibit F403
 from .lsgroups import *  # noqa - inhibit F403
+from .lsmembers import *  # noqa - inhibit F403
 from .bancommit import *  # noqa - inhibit F403

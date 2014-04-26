@@ -11,6 +11,8 @@ class BanCommit(SiteCommand):
     '''
     Obtain a list of all(visible) groups on a site
 
+    :param project: The repository name containingg the commit
+    :param commit: The SHA-1 for the commit to be banned
     :param option_str: List of options to pass to the command
 
     '''

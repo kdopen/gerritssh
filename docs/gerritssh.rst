@@ -36,6 +36,14 @@ gerritssh.lsgroups module
     :undoc-members:
     :show-inheritance:
 
+gerritssh.lsmembers module
+--------------------------
+
+.. automodule:: gerritssh.lsmembers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gerritssh.lsprojects module
 ---------------------------
 
