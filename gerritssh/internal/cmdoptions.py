@@ -15,22 +15,16 @@ the `ProjectList` command for a full implementation).
   is best done as a class attribute, as the information is constant for
   all instances.
 
-* Create a CmdOptionParser instance (usally in the __init__ method) which
-  can be used, in combination with the OptionSet, to parse lists of
-  options. This is normally an instance variable, as it is a mutable
-  object.
+* Pass the OptionSet, and list of options to be parsed, to the constructor
+  for the abstract SiteCommand class.
 
-* Use the CmdOptionParser to parse the provided command line options.
+* When the `execute_on` method is invoked, call check_support_for() in the
+  base class, which will verify all options (and the command itself) are
+  supported in the Gerrit version for the given site.
 
-* When the `execute_on` method is invoked:
 
-  * Check that the command is supported on the provided Site.
-  * Check that the parsed options are supported
-  * Override the provided options, and add others if required
-  * Recover the ParsedOptions as a string and pass it to the
-    base class's execute method.
-
-A complete framework for a command implementation might look like::
+A complete framework for a command implementation, supported on Gerrit versions
+2.7 and above, might look like::
 
     class SomeCommand(SiteCommand):
 
@@ -41,17 +35,16 @@ A complete framework for a command implementation might look like::
                         Option.flag('needed'))
 
         def __init__(self, options_string):
-            super(SomeCommand,self).__init__()
-            self.__parser = CmdOptionParser(SomeCommand.__options)
-            self.__parsed = self.__parser.parse(options_string)
+            super(SomeCommand,self).__init__('>=2.7',
+                                             SomeCommand.__options,
+                                             options_string)
 
         def execute_on(self, site):
-            if not (site.version_in ('>=2.7') and
-                    self.__parsed.supported_in(site.version)):
-                raise NotImplementedError()
-
             # We always need to specify --needed for some reason
             self.__parsed.needed = True
+
+            # Check the support *after* overriding options
+            self.check_support_for(site)
 
             return site.execute(' '.join(['some-command',
                                         self.__parsed]).strip())

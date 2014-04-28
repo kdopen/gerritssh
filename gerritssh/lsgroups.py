@@ -27,10 +27,9 @@ class ListGroups(SiteCommand):
     __supported_versions = '>=2.4'
 
     def __init__(self, option_str=''):
-        super(ListGroups, self).__init__()
-        self.__parser = CmdOptionParser(ListGroups.__options)
-        self.__option_str = option_str
-        self.__parsed_options = self.__parser.parse(option_str)
+        super(ListGroups, self).__init__(ListGroups.__supported_versions,
+                                         ListGroups.__options,
+                                         option_str)
 
     def execute_on(self, the_site):
         '''
@@ -41,19 +40,9 @@ class ListGroups(SiteCommand):
             the verbose option is specified.
         '''
 
-        not_supported = (
-            'Gerrit version {0} does not support '.format(the_site.version)
-            )
-
-        if not the_site.version_in(ListGroups.__supported_versions):
-            raise NotImplementedError(not_supported + 'this command')
-
-        if not self.__parsed_options.supported_in(the_site.version):
-            raise NotImplementedError(not_supported +
-                                      'one or more options provided')
-
+        self.check_support_for(the_site)
         raw = the_site.execute(' '.join(['ls-groups',
-                                        str(self.__parsed_options)]
+                                        str(self._parsed_options)]
                                         ).strip())
         self._results = [l for l in raw if l]
         return self._results

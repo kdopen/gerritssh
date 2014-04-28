@@ -77,12 +77,11 @@ class Query(SiteCommand):
     __supported_versions = '>=2.4'
 
     def __init__(self, option_str='', query='', max_results=0):
-        super(Query, self).__init__()
         self.__query = query
         self.__max_results = max_results
-        self.__parser = CmdOptionParser(Query.__options)
-        self.__option_str = option_str
-        self.__parsed_options = self.__parser.parse(option_str)
+        super(Query, self).__init__(Query.__supported_versions,
+                                    Query.__options,
+                                    option_str)
 
     def execute_on(self, the_site):
         '''
@@ -93,27 +92,19 @@ class Query(SiteCommand):
         :returns: A list of GerritReview objects converted from returned JSON
 
         '''
-
-        not_supported = (
-            'Gerrit version {0} does not support '.format(the_site.version)
-            )
-
-        if not the_site.version_in(Query.__supported_versions):
-            raise NotImplementedError(not_supported + 'this command')
-
-        if not self.__parsed_options.supported_in(the_site.version):
-            raise NotImplementedError(not_supported +
-                                      'one or more options provided')
-
         # Set the options we require in order to parse the results.
-        opts = self.__parsed_options
+        opts = self._parsed_options
         opts.current_patch_set = True
         opts.patch_sets = True
         opts.all_approvals = True
         opts.dependencies = True
         opts.commit_message = True
         opts.format = 'JSON'
-        result, resume_key, remaining = [], '', self.__max_results
+        self.check_support_for(the_site)
+
+        result = []
+        resume_key = ''
+        remaining = self.__max_results
 
         def partial_query():
             '''Helper to perform a single sub-query'''

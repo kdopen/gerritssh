@@ -29,10 +29,9 @@ class ProjectList(SiteCommand):
     __supported_versions = '>=2.4'
 
     def __init__(self, option_str=''):
-        super(ProjectList, self).__init__()
-        self.__parser = CmdOptionParser(ProjectList.__options)
-        self.__option_str = option_str
-        self.__parsed_options = self.__parser.parse(option_str)
+        super(ProjectList, self).__init__(ProjectList.__supported_versions,
+                                          ProjectList.__options,
+                                          option_str)
 
     def execute_on(self, the_site):
         '''
@@ -41,20 +40,9 @@ class ProjectList(SiteCommand):
 
         :returns: A list of :class:`Review` objects
         '''
-
-        not_supported = (
-            'Gerrit version {0} does not support '.format(the_site.version)
-            )
-
-        if not the_site.version_in(ProjectList.__supported_versions):
-            raise NotImplementedError(not_supported + 'this command')
-
-        if not self.__parsed_options.supported_in(the_site.version):
-            raise NotImplementedError(not_supported +
-                                      'one or more options provided')
-
+        self.check_support_for(the_site)
         raw = the_site.execute(' '.join(['ls-projects',
-                                        str(self.__parsed_options)]
+                                        str(self._parsed_options)]
                                         ).strip())
         self._results = [l for l in raw if l]
         return self._results

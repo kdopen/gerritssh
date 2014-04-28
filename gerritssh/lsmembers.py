@@ -31,8 +31,6 @@ class ListMembers(SiteCommand):
     __supported_versions = '>=2.8'
 
     def __init__(self, group, option_str=''):
-        super(ListMembers, self).__init__()
-
         if not isinstance(group, str):
             raise AttributeError('Group must be a string')
 
@@ -40,9 +38,9 @@ class ListMembers(SiteCommand):
             raise ValueError('Caller must provide a non-null group name')
 
         self.__group = group
-        self.__parser = CmdOptionParser(ListMembers.__options)
-        self.__option_str = option_str
-        self.__parsed_options = self.__parser.parse(option_str)
+        super(ListMembers, self).__init__(ListMembers.__supported_versions,
+                                          ListMembers.__options,
+                                          option_str)
 
     def execute_on(self, the_site):
         '''
@@ -58,20 +56,10 @@ class ListMembers(SiteCommand):
         :raises: InvalidGroupError if the command returns an error line
 
         '''
-
-        not_supported = (
-            'Gerrit version {0} does not support '.format(the_site.version)
-            )
-
-        if not the_site.version_in(ListMembers.__supported_versions):
-            raise NotImplementedError(not_supported + 'this command')
-
-        if not self.__parsed_options.supported_in(the_site.version):
-            raise NotImplementedError(not_supported +
-                                      'one or more options provided')
+        self.check_support_for(the_site)
 
         cmd = ' '.join(['ls-members',
-                        str(self.__parsed_options),
+                        str(self._parsed_options),
                         self.__group]
                        ).strip()
         raw = the_site.execute(cmd)
