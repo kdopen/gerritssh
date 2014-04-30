@@ -51,7 +51,7 @@ import semantic_version as SV
 
 from gerritssh import GerritsshException
 from gerritssh.borrowed import ssh
-from gerritssh.internal.cmdoptions import *
+from gerritssh.internal.cmdoptions import *  # noqa
 
 
 _logger = logging.getLogger(__name__)

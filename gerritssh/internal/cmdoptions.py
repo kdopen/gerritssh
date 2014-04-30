@@ -160,7 +160,7 @@ class ParsedOptions(object):
         '''
         # no dict comprehensions in 2.6
         results = dict([(k, v)
-                        for k, v in self.__dict__.items()
+                        for k, v in list(self.__dict__.items())
                         if not k.startswith('_')])
 
         strs = []
@@ -273,7 +273,7 @@ class Option(object):
     flags, choices, and valued option definitions each take the following
     parameters:
 
-    :param long:
+    :param long_name:
         A string providing the long name for the option (without the leading
         '--')
     :param short:
@@ -294,7 +294,7 @@ class Option(object):
 
     @staticmethod
     def __check_args(opt_type,
-                     long,
+                     long_name,
                      short,
                      kwargs,
                      repeat_action,
@@ -306,16 +306,16 @@ class Option(object):
         else:
             rdict['action'] = default_action
 
-        p_args = (('--' + long, '-' + short) if short else ('--' + long,))
+        p_args = (('--' + long_name, '-' + short) if short else ('--' + long_name,))
         option = OptionRepr(type=opt_type,
-                            key=long.replace('-', '_'),
+                            key=long_name.replace('-', '_'),
                             args=p_args,
                             kwargs=rdict,
                             spec=kwargs.get('spec'))
         return option
 
     @staticmethod
-    def flag(long, short='', **kwargs):
+    def flag(long_name, short='', **kwargs):
         '''
         Create a simple flag option.
 
@@ -335,14 +335,14 @@ class Option(object):
 
         '''
         return Option.__check_args('flag',
-                                   long,
+                                   long_name,
                                    short,
                                    kwargs,
                                    'count',
                                    'store_true')
 
     @staticmethod
-    def choice(long, short='', choices=[], **kwargs):
+    def choice(long_name, short='', choices=[], **kwargs):
         r'''
         Define an option which requires a seleciton from a list of values.
 
@@ -356,11 +356,11 @@ class Option(object):
             Option.choice('format', 'f', choices=['json', 'text', 'html'])
 
         '''
-        return Option.__check_args('choice', long, short, kwargs, 'append',
+        return Option.__check_args('choice', long_name, short, kwargs, 'append',
                                    'store', extra_kwords={'choices': choices})
 
     @staticmethod
-    def valued(long, short='', **kwargs):
+    def valued(long_name, short='', **kwargs):
         '''
         Define an option which takes a value.
 
@@ -371,7 +371,7 @@ class Option(object):
             Option.valued('project', 'p', repeatable=True, spec='>=1.2.3')
 
         '''
-        return Option.__check_args('valued', long, short, kwargs, 'append',
+        return Option.__check_args('valued', long_name, short, kwargs, 'append',
                                    'store')
 
 __all__ = ['OptionSet', 'Option', 'CmdOptionParser']

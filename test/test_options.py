@@ -23,84 +23,84 @@ def option_set(option_tuple):
 class TestOption(object):
 
     def test_option_flag(self):
-        long = 'long-name'
-        key = long.replace('-', '_')
+        long_name = 'long-name'
+        key = long_name.replace('-', '_')
         short = 'short-name'
-        f = Option.flag(long, short)
+        f = Option.flag(long_name, short)
         assert f.key == key
         assert f.type == 'flag'
         assert not f.spec
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
         assert f.kwargs['action'] == 'store_true'
 
-        f = Option.flag(long, short, repeatable=True)
+        f = Option.flag(long_name, short, repeatable=True)
         assert f.kwargs['action'] == 'count'
         assert f.key == key
         assert f.type == 'flag'
         assert not f.spec
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
 
-        f = Option.flag(long, short, spec='>1.0')
+        f = Option.flag(long_name, short, spec='>1.0')
         assert f.key == key
         assert f.type == 'flag'
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
         assert f.kwargs['action'] == 'store_true'
         assert f.spec == '>1.0'
 
     def test_option_valued(self):
-        long = 'long_name'
+        long_name = 'long_name'
         short = 'short-name'
-        key = long.replace('-', '_')
+        key = long_name.replace('-', '_')
 
-        f = Option.valued(long, short)
+        f = Option.valued(long_name, short)
         assert f.key == key
         assert f.type == 'valued'
         assert not f.spec
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
         assert f.kwargs['action'] == 'store'
 
-        f = Option.valued(long, short, repeatable=True)
+        f = Option.valued(long_name, short, repeatable=True)
         assert f.kwargs['action'] == 'append'
         assert f.key == key
         assert f.type == 'valued'
         assert not f.spec
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
 
-        f = Option.valued(long, short, repeatable=True, spec='>1.0')
+        f = Option.valued(long_name, short, repeatable=True, spec='>1.0')
         assert f.kwargs['action'] == 'append'
         assert f.spec == '>1.0'
         assert f.key == key
         assert f.type == 'valued'
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
 
     def test_option_choices(self):
-        long = 'long_name'
+        long_name = 'long_name'
         short = 'short-name'
         choices = ['a', 'b']
-        key = long.replace('-', '_')
+        key = long_name.replace('-', '_')
 
-        f = Option.choice(long, short, choices)
+        f = Option.choice(long_name, short, choices)
         assert f.key == key
         assert f.type == 'choice'
         assert not f.spec
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
         assert f.kwargs['action'] == 'store'
         assert f.kwargs['choices'] == choices
 
-        f = Option.choice(long, short, choices, repeatable=True)
+        f = Option.choice(long_name, short, choices, repeatable=True)
         assert f.kwargs['action'] == 'append'
         assert f.key == key
         assert f.type == 'choice'
         assert not f.spec
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
         assert f.kwargs['choices'] == choices
 
-        f = Option.choice(long, short, choices, repeatable=True, spec='>1.0')
+        f = Option.choice(long_name, short, choices, repeatable=True, spec='>1.0')
         assert f.kwargs['action'] == 'append'
         assert f.spec == '>1.0'
         assert f.key == key
         assert f.type == 'choice'
-        assert f.args == ('--' + long, '-' + short)
+        assert f.args == ('--' + long_name, '-' + short)
         assert f.kwargs['choices'] == choices
 
 

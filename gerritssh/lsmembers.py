@@ -71,7 +71,8 @@ class ListMembers(SiteCommand):
             raise InvalidGroupError('Error from command: ' + raw[0])
 
         field_names = ['id', 'username', 'fullname', 'email']
-        self._results = [dict(zip(field_names, member.split('\t')))
+        # The heavy use of list(..list()) here is a 2to3 thing
+        self._results = [dict(list(zip(field_names, member.split('\t'))))
                          for member in raw[1:]]
         return self._results
 
