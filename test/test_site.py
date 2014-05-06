@@ -51,9 +51,8 @@ def test_init():
     assert s, 'Failed to create a Site object'
     assert s.site == 'gerrit.example.com', \
     'Did not record the site name properly'
-    assert repr(s) == ('<gerritssh.gerritsite.Site'
-                       '(site=gerrit.example.com'
-                       ', connected=False)>')
+    assert repr(s) == ("<gerritssh.gerritsite.Site(args=('gerrit.example.com',"
+                       " None, None, None), connected=False)>")
 
     with pytest.raises(TypeError):
         _ = gerritssh.Site(1)
