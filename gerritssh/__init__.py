@@ -1,8 +1,3 @@
-__author__ = 'Keith Derrick'
-__email__ = 'kderrick_public@att.net'
-__version__ = '0.1.0'
-
-
 class GerritsshException(Exception):
     '''
         Base class for each of the package's exceptions.

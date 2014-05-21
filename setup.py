@@ -29,7 +29,7 @@ class PyTest(TestCommand):
 
 
 readme = open('README.rst').read()
-from gerritssh import __version__ as gerritssh_version
+import VERSION
 
 doclink = """
 Documentation
@@ -40,11 +40,11 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='gerritssh',
-    version=gerritssh_version,
+    version=VERSION.__version__,
     description='Python package wrapping the Gerrit command line API',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
-    author='Keith Derrick',
-    author_email='kderrick_public@att.net',
+    author=VERSION.__author__,
+    author_email=VERSION.__email__,
     url='https://github.com/kdopen/gerritssh',
     packages=find_packages(exclude=['test']),
     package_dir={'gerritssh': 'gerritssh'},
