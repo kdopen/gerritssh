@@ -34,7 +34,7 @@ import datetime as dt
 
 try:  # pragma: no cover
     import urllib.parse as urlp  # Python 3
-except:  # pragma: no cover
+except ImportError:  # pragma: no cover
     import urlparse as urlp  # Python 2
 
 
