@@ -28,7 +28,7 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-readme = open('README.rst').read()
+readme = '\n' + open('README.rst').read()
 import VERSION
 
 doclink = """
@@ -49,15 +49,19 @@ setup(
     packages=find_packages(exclude=['test']),
     package_dir={'gerritssh': 'gerritssh'},
     include_package_data=True,
-    install_requires=[],
+    install_requires=['paramiko>=1.13,<2',
+                      'semantic-version>=2.3,<3'
+                     ],
     license='Apache',
     zip_safe=False,
     keywords='gerritssh',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License 2.0',
+        'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
