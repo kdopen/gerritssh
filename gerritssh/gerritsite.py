@@ -51,6 +51,8 @@ import semantic_version as SV
 
 from gerritssh import GerritsshException
 from gerritssh.borrowed import ssh
+from gerritssh.internal.cmdoptions import *  # noqa
+
 
 _logger = logging.getLogger(__name__)
 
@@ -80,6 +82,12 @@ class Site(object):
 
     :param str sitename:
         The top level URL for the site, e.g. 'gerrit.example.com'
+    :param username:
+        The optional user to log in as
+    :param port:
+        The optional port to connect on
+    :param keyfile:
+        The optional file containing the SSH key to use
 
     :raises: TypeError if sitename is not a string
 
@@ -95,19 +103,21 @@ class Site(object):
 
     '''
 
-    def __init__(self, sitename, username=None, port=None):
+    def __init__(self, sitename, username=None, port=None, keyfile=None):
         if not isinstance(sitename, str):
             raise TypeError('sitename must be a string')
 
-        self.__init_args = (sitename, username, port)
+        self.__init_args = (sitename, username, port, keyfile)
         self.__site = sitename
         self.__ssh_prefix = 'gerrit'
         self.__version = SV.Version('0.0.0')
-        self.__ssh = ssh.GerritSSHClient(sitename, username, port)
+        self.__keyfile = keyfile
+        self.__ssh = ssh.GerritSSHClient(sitename, username, port, keyfile)
 
     def __repr__(self):
-        return ('<gerritssh.gerritsite.Site(site=%s, connected=%s)>'
-                % (self.site, self.connected))
+        ''' String representation of the instance '''
+        return ('<gerritssh.gerritsite.Site(args=%s, connected=%s)>'
+                % (self.__init_args, self.connected))
 
     def copy(self):
         '''
@@ -133,6 +143,7 @@ class Site(object):
         Site objects to be safely used with copy.copy() and copy.deepCopy()
 
         '''
+        _logger.debug('copy<%s>' % self)
         return Site(*self.__init_args)
 
     # Alias the magic methods used by the copy module
@@ -144,6 +155,7 @@ class Site(object):
         a new, shallow copy
 
         '''
+        _logger.debug('deepcopy<%s, %s>' % (self, memo))
         return self.copy()
 
     def __extract_version(self, vstr):
@@ -160,9 +172,9 @@ class Site(object):
 
         '''
         cmdline = '{0} {1} {2}'.format(self.__ssh_prefix, command, args)
-        _logger.debug('Executing: %s' % cmdline)
+        _logger.debug('Site Executing: %s' % cmdline)
         result = self.__ssh.execute(cmdline)
-        _logger.debug('Response:%s' % repr(result))
+        _logger.debug('Command Response:%s' % repr(result))
 #         return result if isinstance(result, str) else result.decode('utf-8')
         return [l for s in result.stdout.readlines() for l in s.splitlines()]
 
@@ -176,14 +188,16 @@ class Site(object):
             if it is not possible to connect to the site
 
         '''
-        if self.connected:
-            return
-
         _logger.debug('Attempting to connect to site: {0}'.format(self.site))
+
+        if self.connected:
+            _logger.debug('Already connected')
+            return
 
         try:
             resp = self.__do_command('version')
-        except ssh.SSHException:
+        except ssh.SSHException as e:
+            _logger.debug('Failed to connect: ' + str(e.args))
             raise SSHConnectionError('Failed to connect to ' + self.site)
 
         _logger.debug('Connected OK: resp: {0}'.format(resp[0].strip()))
@@ -197,6 +211,7 @@ class Site(object):
         :returns: self to allow chaining
 
         '''
+        _logger.debug('Disconnecting from ' + self.site)
         self.__ssh.disconnect()
         return self
 
@@ -224,16 +239,20 @@ class Site(object):
 
         '''
         if not self.connected:
+            _logger.debug('Attempted to execute command without a connection')
             raise SSHConnectionError('No connection')
 
         if isinstance(cmd, SiteCommand):
             return cmd.execute_on(self)
         elif cmd and not isinstance(cmd, str):
+            _logger.debug('Invalid argument to cmd. Got type '
+                          + str(type(cmd)))
             raise InvalidCommandError(('Expected an instance of SiteCommand,'
                                        ' or a string. Got ')
                                       + str(type(cmd)))
 
         if not cmd:
+            _logger.debug('No command found')
             raise InvalidCommandError('No command found')
 
         return self.__do_command(cmd)
@@ -293,6 +312,7 @@ class Site(object):
 
         '''
         if not self.connected:
+            _logger.debug('Attempt to get version of unconnected site')
             raise SSHConnectionError('Site is not connected')
 
         spec = SV.Spec(constraint)
@@ -322,12 +342,15 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
     The key method to override is :meth:`execute_on` which uses the provided
     Site object to actually implement the command. The method returns its
     results, usually as an iterable. The parameters for the command are
-    meant to be provided to the constructor.
+    meant to be provided to the constructor of the concrete class.
 
     On completion, the `execute_on` method should store its results in
     self._results as an iterable object, to allow iteration over the object.
 
-    For example, a class to represent the ls-projects command, with the
+    The constructor creates a parser and parses the provided options string,
+    storing the results in self._parsed_options.
+
+    For example, a minimal class to represent the ls-projects command, with the
     response in JSON format (on a site which supports it) might declare the
     method as follows::
 
@@ -336,7 +359,7 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
                 super(JSONProjects,self).__init__()
 
             def execute_on(self, site):
-                self._results = site.execute('ls-projects --format JSON')
+                self._results = site.execute('ls-projects')
                 return self._results
 
     and be used thus::
@@ -366,10 +389,50 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
         for p in cmd:
             pass
 
+    :param cmd_supported_in:
+        The semantic-version compliant version specification defining which
+        Gerrit versions support the command.
+
+        If not specified, or specified as None, defaults to '>=2.4'
+
+    :param option_set:
+        An OptionSet instance defining the options supported by the command
+
+        If not specfied, or given as None, no options will be parsed. You can
+        not provide an `option_str` argument without an `OptionSet`.
+
+    :param option_str:
+        The options to be parsed and passed to the Gerrit site.
+
+        Defaults to '' if omitted or given as None.
+
+    :raises: `TypeError` if `option_set` is not an OptionSet instance
+    :raises: `ValueError` if `option_str` is specified without an `option_set`
+    :raises: `SystemExit` if the option_str fails to parse
+
     '''
 
-    def __init__(self):
+    def __init__(self, cmd_supported_in, option_set, option_str):
         self._results = []
+        self._options = option_set
+        self._option_str = option_str
+        self._supported_in = cmd_supported_in or '>=2.4'
+
+        if option_set:
+            if not isinstance(option_set, OptionSet):
+                _logger.debug('Invalid type for option_set argument:' +
+                              str(type(option_set)))
+                raise TypeError('Invalid type for option_set argument')
+
+            self._parser = CmdOptionParser(option_set)
+            self._parsed_options = self._parser.parse(option_str or '')
+        else:
+            self._parser = None
+            self._parsed_options = None
+
+            if option_str:
+                _logger.debug('Options string provided without OptionSet')
+                raise ValueError('Options string provided without OptionSet')
 
     def __iter__(self):
         '''
@@ -382,6 +445,33 @@ class SiteCommand(abc.ABCMeta('newbase', (object,), {})):
     def results(self):
         ''' Results from the most recent execution '''
         return self._results
+
+    def check_support_for(self, site):
+        '''
+        Validate that the provided site supports the command and all provided
+        options.
+
+        :param site: A connected `Site` instance
+
+        :raises: `NotImplementedError`
+            If the command or one of the options are unsupported on the site.
+
+
+        '''
+        not_supported = (
+            'Gerrit version {0} does not support '.format(site.version)
+            )
+
+        if not site.version_in(self._supported_in):
+            _logger.debug('Command not supported')
+            raise NotImplementedError(not_supported + 'this command')
+
+        if self._parsed_options:
+            if not self._parsed_options.supported_in(site.version):
+                _logger.debug('Some options not supported in: ' +
+                              str(self._parsed_options))
+                raise NotImplementedError(not_supported +
+                                          'one or more options provided')
 
     @abc.abstractmethod
     def execute_on(self, the_site):

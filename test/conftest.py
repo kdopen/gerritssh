@@ -27,11 +27,15 @@ def connected_site():
 
         def execute(self, command):
             import io
+            import sys
             self.connected = True
+            vstr = 'gerrit version 2.9.0\n'
+            if sys.version_info[0] < 3:
+                vstr = unicode(vstr)
+
             result = SSHCommandResult(command,
                                       io.StringIO(),
-                                      io.StringIO(u'gerrit version '
-                                                  '2.9.0\n'),
+                                      io.StringIO(vstr),
                                       io.StringIO())
 
             return result

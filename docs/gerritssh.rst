@@ -12,10 +12,34 @@ Subpackages
 Submodules
 ----------
 
+gerritssh.bancommit module
+--------------------------
+
+.. automodule:: gerritssh.bancommit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gerritssh.gerritsite module
 ---------------------------
 
 .. automodule:: gerritssh.gerritsite
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+gerritssh.lsgroups module
+-------------------------
+
+.. automodule:: gerritssh.lsgroups
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+gerritssh.lsmembers module
+--------------------------
+
+.. automodule:: gerritssh.lsmembers
     :members:
     :undoc-members:
     :show-inheritance:

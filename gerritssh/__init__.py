@@ -1,8 +1,3 @@
-__author__ = 'Keith Derrick'
-__email__ = 'kderrick_public@att.net'
-__version__ = '0.1.0'
-
-
 class GerritsshException(Exception):
     '''
         Base class for each of the package's exceptions.
@@ -37,3 +32,6 @@ from .gerritsite import *  # noqa - inhibit F403
 from .query import *  # noqa - inhibit F403
 from .review import *  # noqa - inhibit F403
 from .lsprojects import *  # noqa - inhibit F403
+from .lsgroups import *  # noqa - inhibit F403
+from .lsmembers import *  # noqa - inhibit F403
+from .bancommit import *  # noqa - inhibit F403

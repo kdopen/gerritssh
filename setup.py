@@ -28,8 +28,8 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-readme = open('README.rst').read()
-from gerritssh import __version__ as gerritssh_version
+readme = '\n' + open('README.rst').read()
+import VERSION
 
 doclink = """
 Documentation
@@ -40,24 +40,28 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='gerritssh',
-    version=gerritssh_version,
+    version=VERSION.__version__,
     description='Python package wrapping the Gerrit command line API',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
-    author='Keith Derrick',
-    author_email='kderrick_public@att.net',
+    author=VERSION.__author__,
+    author_email=VERSION.__email__,
     url='https://github.com/kdopen/gerritssh',
     packages=find_packages(exclude=['test']),
     package_dir={'gerritssh': 'gerritssh'},
     include_package_data=True,
-    install_requires=[],
+    install_requires=['paramiko>=1.13,<2',
+                      'semantic-version>=2.3,<3'
+                     ],
     license='Apache',
     zip_safe=False,
     keywords='gerritssh',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License 2.0',
+        'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',

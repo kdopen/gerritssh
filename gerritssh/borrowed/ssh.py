@@ -25,7 +25,7 @@
 Gerrit SSH Client.
 
 A thin wrapper/extension of Paramiko's SSHClient class, adding logic
-to parse the standard configuraiton file from ~/.ssh.
+to parse the standard configuration file from ~/.ssh.
 
 It also provides lightweight threading protection to allow a single
 connection to be used by multiple threads.
@@ -69,18 +69,19 @@ class GerritSSHClient(SSHClient):
     """
     Gerrit SSH Client, extending the paramiko SSH Client.
 
-    :param hostname: The host to connect to
-    :param username: The user name to use oin connection
-    :param port:     The port to use
+    :param hostname:     The host to connect to
+    :param username:     The optional user name to use on connection
+    :param port:         The optional port to use
+    :param keyfile_name: The optional key file to use
 
     """
 
-    def __init__(self, hostname, username=None, port=None):
-        """ Initialise and connect to SSH. """
+    def __init__(self, hostname, username=None, port=None, keyfile_name=None):
+        """ Initialize and connect to SSH. """
         super(GerritSSHClient, self).__init__()
         self.hostname = hostname
         self.username = username
-        self.key_filename = None
+        self.key_filename = keyfile_name
         self.port = port
         self.__connected = Event()
         self.lock = Lock()
@@ -99,7 +100,7 @@ class GerritSSHClient(SSHClient):
         :raise:
             SSHException under the following conditions:
 
-            * No configuraiton file is found
+            * No configuration file is found
             * It does not contain an entry for the Host.
             * It references a keyfile which does not exist
             * The port number is non-numeric or negative
@@ -124,13 +125,14 @@ class GerritSSHClient(SSHClient):
         if not self.username:
             self.username = data.get('user', None)
 
-        if 'identityfile' in data:
-            key_filename = abspath(expanduser(data['identityfile'][0]))
+        if self.key_filename:
+            self.key_filename = abspath(expanduser(self.key_filename))
+        elif 'identityfile' in data:
+            self.key_filename = abspath(expanduser(data['identityfile'][0]))
 
-            if not isfile(key_filename):
-                raise SSHException("Identity file '%s' does not exist" %
-                                   key_filename)
-            self.key_filename = key_filename
+        if self.key_filename and not isfile(self.key_filename):
+            raise SSHException("Identity file '%s' does not exist" %
+                               self.key_filename)
 
         if self.port is None:
             try:
@@ -138,7 +140,8 @@ class GerritSSHClient(SSHClient):
             except ValueError:
                 raise SSHException("Invalid port: %s" % data['port'])
 
-        if not (self.hostname and self.port and self.username):
+        config_data = (self.hostname, self.port, self.username)
+        if not all(config_data):
             raise SSHException("Missing configuration data in %s" % configfile)
 
     def _do_connect(self):

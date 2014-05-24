@@ -15,22 +15,16 @@ the `ProjectList` command for a full implementation).
   is best done as a class attribute, as the information is constant for
   all instances.
 
-* Create a CmdOptionParser instance (usally in the __init__ method) which
-  can be used, in combination with the OptionSet, to parse lists of
-  options. This is normally an instance variable, as it is a mutable
-  object.
+* Pass the OptionSet, and list of options to be parsed, to the constructor
+  for the abstract SiteCommand class.
 
-* Use the CmdOptionParser to parse the provided command line options.
+* When the `execute_on` method is invoked, call check_support_for() in the
+  base class, which will verify all options (and the command itself) are
+  supported in the Gerrit version for the given site.
 
-* When the `execute_on` method is invoked:
 
-  * Check that the command is supported on the provided Site.
-  * Check that the parsed options are supported
-  * Override the provided options, and add others if required
-  * Recover the ParsedOptions as a string and pass it to the
-    base class's execute method.
-
-A complete framework for a command implementation might look like::
+A complete framework for a command implementation, supported on Gerrit versions
+2.7 and above, might look like::
 
     class SomeCommand(SiteCommand):
 
@@ -41,17 +35,16 @@ A complete framework for a command implementation might look like::
                         Option.flag('needed'))
 
         def __init__(self, options_string):
-            super(SomeCommand,self).__init__()
-            self.__parser = CmdOptionParser(SomeCommand.__options)
-            self.__parsed = self.__parser.parse(options_string)
+            super(SomeCommand,self).__init__('>=2.7',
+                                             SomeCommand.__options,
+                                             options_string)
 
         def execute_on(self, site):
-            if not (site.version_in ('>=2.7') and
-                    self.__parsed.supported_in(site.version)):
-                raise NotImplementedError()
-
             # We always need to specify --needed for some reason
             self.__parsed.needed = True
+
+            # Check the support *after* overriding options
+            self.check_support_for(site)
 
             return site.execute(' '.join(['some-command',
                                         self.__parsed]).strip())
@@ -167,7 +160,7 @@ class ParsedOptions(object):
         '''
         # no dict comprehensions in 2.6
         results = dict([(k, v)
-                        for k, v in self.__dict__.items()
+                        for k, v in list(self.__dict__.items())
                         if not k.startswith('_')])
 
         strs = []
@@ -280,7 +273,7 @@ class Option(object):
     flags, choices, and valued option definitions each take the following
     parameters:
 
-    :param long:
+    :param long_name:
         A string providing the long name for the option (without the leading
         '--')
     :param short:
@@ -301,7 +294,7 @@ class Option(object):
 
     @staticmethod
     def __check_args(opt_type,
-                     long,
+                     long_name,
                      short,
                      kwargs,
                      repeat_action,
@@ -313,16 +306,16 @@ class Option(object):
         else:
             rdict['action'] = default_action
 
-        p_args = (('--' + long, '-' + short) if short else ('--' + long,))
+        p_args = (('--' + long_name, '-' + short) if short else ('--' + long_name,))
         option = OptionRepr(type=opt_type,
-                            key=long.replace('-', '_'),
+                            key=long_name.replace('-', '_'),
                             args=p_args,
                             kwargs=rdict,
                             spec=kwargs.get('spec'))
         return option
 
     @staticmethod
-    def flag(long, short='', **kwargs):
+    def flag(long_name, short='', **kwargs):
         '''
         Create a simple flag option.
 
@@ -342,14 +335,14 @@ class Option(object):
 
         '''
         return Option.__check_args('flag',
-                                   long,
+                                   long_name,
                                    short,
                                    kwargs,
                                    'count',
                                    'store_true')
 
     @staticmethod
-    def choice(long, short='', choices=[], **kwargs):
+    def choice(long_name, short='', choices=[], **kwargs):
         r'''
         Define an option which requires a seleciton from a list of values.
 
@@ -363,11 +356,11 @@ class Option(object):
             Option.choice('format', 'f', choices=['json', 'text', 'html'])
 
         '''
-        return Option.__check_args('choice', long, short, kwargs, 'append',
+        return Option.__check_args('choice', long_name, short, kwargs, 'append',
                                    'store', extra_kwords={'choices': choices})
 
     @staticmethod
-    def valued(long, short='', **kwargs):
+    def valued(long_name, short='', **kwargs):
         '''
         Define an option which takes a value.
 
@@ -378,7 +371,7 @@ class Option(object):
             Option.valued('project', 'p', repeatable=True, spec='>=1.2.3')
 
         '''
-        return Option.__check_args('valued', long, short, kwargs, 'append',
+        return Option.__check_args('valued', long_name, short, kwargs, 'append',
                                    'store')
 
 __all__ = ['OptionSet', 'Option', 'CmdOptionParser']

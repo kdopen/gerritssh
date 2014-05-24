@@ -46,12 +46,12 @@ The underlying implementation has the following shortcomings from my point of vi
   
 * Every SSH command creates a new session, with the full overhead of logging in. This
   seems to defeat the value of creating a connection once and then using it for a
-  sequence of commands. My hope is to avoid this overhead once I switch to Paramiko.
+  sequence of commands. My hope was to avoid this overhead once I switched to Paramiko.
   
 * The list of commands is embedded in the main class, making it difficult for library
-  users to extend the library with new commands.
+  clients to add support for new commands.
   
-It does, however, provide a useful reference in understanding how ti use some of
+It does, however, provide a useful reference in understanding how to use some of
 Paramiko's features.
 
 gerrit-cli
@@ -81,7 +81,7 @@ previously mentioned, I really wanted to develop something from scratch.
 It still fails with really large result sets, but does reuse the same SSH connection
 for sequences of commands. 
 
-I have shamelessly borrowed large parts of the ssh module from this library.
+I have borrowed large parts of the ssh module from this library.
 
 python-gerrit
 -------------
@@ -92,5 +92,5 @@ This is a partial implementation, with numerous performance issues. It is also f
 on the ``gerrit review`` command, which is not particularly of interest to me.
 
 However, the 'filters' module (and its representation of AND and OR terms) is simple
-and elegant. I intend to borrow that in a future version.
+and elegant. I intend to leverage that in a future version.
 
