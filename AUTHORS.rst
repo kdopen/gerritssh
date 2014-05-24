@@ -12,7 +12,7 @@ Indirect Contributors
 
 * Eduardo Felipe for his backport of subprocess.check_output to python 2.6. 
   Available at https://gist.github.com/edufelipe/1027906. This was used in
-  the initial version, before switching to paramiko.
+  the initial development, before switching to paramiko.
 
 * David Pursehouse and the people at Sony Xperia Developer World for their 
   excellent pygerrit repository at https://github.com/sonyxperiadev/pygerrit
@@ -21,8 +21,8 @@ Indirect Contributors
 
 * Scott K Maxwell for providing a cross-version branch of Paramiko. This is
   available at https://github.com/scottkmaxwell/paramiko/tree/py3-support-without-py25.
-  This has now been merged to master in the main paramiko repository and should
-  be included in v1.14 of paramiko.
+  This has now been merged to master in the main paramiko repository and was
+  included in v1.14 of paramiko.
 
 Direct Contributors
 -------------------
