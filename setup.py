@@ -2,6 +2,8 @@
 
 import os
 import sys
+import json
+
 from setuptools.command.test import test as TestCommand
 from setuptools import find_packages
 
@@ -29,7 +31,9 @@ class PyTest(TestCommand):
 
 
 readme = '\n' + open('README.rst').read()
-import VERSION
+with open(os.path.join('gerritssh', 'METADATA'), 'rt') as f:
+    pkg_metadata = json.load(f)
+
 
 doclink = """
 Documentation
@@ -40,11 +44,11 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='gerritssh',
-    version=VERSION.__version__,
+    version=pkg_metadata['version'],
     description='Python package wrapping the Gerrit command line API',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
-    author=VERSION.__author__,
-    author_email=VERSION.__email__,
+    author=pkg_metadata['author'],
+    author_email=pkg_metadata['email'],
     url='https://github.com/kdopen/gerritssh',
     packages=find_packages(exclude=['test']),
     package_dir={'gerritssh': 'gerritssh'},

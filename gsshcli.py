@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # encoding: utf-8
 '''
 Simple CLI script to use gerritssh to talk to a site

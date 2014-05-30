@@ -14,6 +14,7 @@
 
 import sys
 import os
+import json
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -24,7 +25,12 @@ cwd = os.getcwd()
 parent = os.path.dirname(cwd)
 sys.path.insert(0, parent)
 
-import VERSION
+pkg_metadata = {}
+version_file = os.path.join(parent, 'gerritssh', 'METADATA')
+
+with open(version_file, 'rt') as f:
+    pkg_metadata = json.load(f)
+
 
 # -- General configuration ----------------------------------------------------
 
@@ -49,14 +55,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'gerritssh'
-copyright = u'2014, ' + VERSION.__author__  # IGNORE:W0622
+copyright = u'2014, ' + pkg_metadata['author']  # IGNORE:W0622
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = VERSION.__version__
+version = pkg_metadata['version']
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -195,7 +201,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual])
 latex_documents = [
   ('index', 'gerritssh.tex', u'gerritssh Documentation',
-   VERSION.__author__, 'manual'),
+   pkg_metadata['author'], 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -225,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'gerritssh', u'gerritssh Documentation',
-     [VERSION.__author__], 1)
+     [pkg_metadata['author']], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -239,7 +245,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'gerritssh', u'gerritssh Documentation',
-   VERSION.__author__, 'gerritssh',
+   pkg_metadata['author'], 'gerritssh',
    'Python wrapper for the Gerrit SSH Command Line',
    'Miscellaneous'),
 ]
