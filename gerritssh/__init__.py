@@ -1,10 +1,22 @@
+import logging
+import os
+
+
 class GerritsshException(Exception):
     '''
         Base class for each of the package's exceptions.
     '''
     pass
 
-import logging
+
+def _getversion():
+    import json
+    with open(os.path.join(os.path.dirname(__file__), 'METADATA'), 'rt') as f:
+        pkg_metadata = json.load(f)
+    return pkg_metadata['version']
+
+__version__ = _getversion()
+del _getversion
 
 # Add a NullHandler to the root logger for the package so that submodules
 # can simply use getLogger(__name__). If the logging module does not contain

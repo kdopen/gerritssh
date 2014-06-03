@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # encoding: utf-8
 '''
 Simple CLI script to use gerritssh to talk to a site
@@ -68,10 +68,10 @@ def reconstitute(args):
         if value == True:
             res.append(keystr)
         elif isinstance(value, list):
-            allf = [' '.join([keystr, v]) for v in value]
+            allf = [' '.join([keystr, str(v)]) for v in value]
             res.append(' '.join(allf))
         else:
-            res.append(' '.join([keystr, value]))
+            res.append(' '.join([keystr, str(value)]))
     return ' '.join(res).strip()
 
 

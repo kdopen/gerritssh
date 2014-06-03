@@ -176,7 +176,11 @@ class Site(object):
         result = self.__ssh.execute(cmdline)
         _logger.debug('Command Response:%s' % repr(result))
 #         return result if isinstance(result, str) else result.decode('utf-8')
-        return [l for s in result.stdout.readlines() for l in s.splitlines()]
+        retval = [l for s in result.stdout.readlines() for l in s.splitlines()]
+        retval = [(l if isinstance(l, str) else str(l.decode('utf-8')))
+                  for l in retval]
+        _logger.debug('Returning:{0}'.format(retval))
+        return retval
 
     def connect(self):
         '''
