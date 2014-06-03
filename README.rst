@@ -7,8 +7,12 @@ gerritssh
 .. image:: https://travis-ci.org/kdopen/gerritssh.png?branch=master
         :target: https://travis-ci.org/kdopen/gerritssh
 
-.. image:: https://pypip.in/d/gerritssh/badge.png
-        :target: https://crate.io/packages/gerritssh?version=latest
+
+.. image:: https://coveralls.io/repos/kdopen/gerritssh/badge.png
+  :target: https://coveralls.io/r/kdopen/gerritssh
+
+.. image:: https://pypip.in/d/gerritssh/badge.png?version=latest
+        :target: https://crate.io/packages/gerritssh
 
 
 Python package wrapping the Gerrit command line API.
