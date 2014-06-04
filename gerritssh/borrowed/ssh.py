@@ -224,7 +224,7 @@ class GerritSSHClient(SSHClient):
         self.lock.acquire()
 
         try:
-            if self.connected():
+            if self.connected:
                 self.close()
                 self.__connected.clear()
         finally:
