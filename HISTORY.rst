@@ -4,6 +4,28 @@
 Release Notes
 =============
 
+0.1.3 (2014-06-04)
+------------------
+
+* Fixes #4 - Unit tests are not sufficient
+
+  Added a baseline set of unit tests which perform end-to-end validation
+  against a live Gerrit instance if GSSH_TEST_INSTANCE is set in the 
+  environment.
+
+* Corrects a bug found in the ssh client disconnect function by the new
+  tests.
+
+* Adds new and extended make targets to better clean and test the package.
+
+* Updated documentation accordingly, including expanded testing information.
+
+* Removed ``pypi`` from the list of environments used on travis-ci.
+
+  The tests all run fine under pypi locally, but something in travis's
+  pypi environment seems to be broken since they started supporting
+  Python 3.4.
+
 0.1.2 (2014-06-03)
 ------------------
 
