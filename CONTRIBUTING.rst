@@ -111,17 +111,44 @@ Before you submit a pull request, check that it meets these guidelines:
 #. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-#. The pull request should work for Python 2.6, 2.7, and 3.3.
+#. The pull request should work for Python 2.6, 2.7, 3.3, and 3.4.
    Check https://travis-ci.org/kdopen/gerritssh 
    under pull requests for active pull requests or run the ``tox`` command and
    make sure that the tests pass for all supported Python versions.
+   
+.. note::
+    ``gerritssh`` uses the git-flow branching model. Please request that
+    your pull-request be merged to the ``develop`` branch, and ensure your
+    changes are based on the ``develop`` branch.
 
-
-Tips
-----
+Testing
+-------
 
 To run a subset of tests::
 
 	 $ py.test test/test_<module>.py
 	 
 where ``<module>`` is the name of the actual submodule you wish to test.
+
+To run tests on all Python versions::
+
+    $ make test-all 
+      or
+    $ tox
+
+To ensure that you have not introduced any errors which would only show up when
+actually communicating with a real Gerrit instance, there are a set of tests
+which perform no mocking, and actually 'reach out' to a live instance. If you
+have an account with review.openstack.org - and have added your public key -
+simply run::
+
+    $ make test-all-online
+      or
+    $ make test-online
+
+If you have an account on a different Gerrit instance, you can test against it
+instead::
+
+    $ GSSH_TEST_INSTANCE='gerrit.mysite.com' tox
+      or 
+    $ GSSH_TEST_INSTANCE-'gerrit.mysite.com' py.test
