@@ -53,7 +53,7 @@ setup(
     packages=find_packages(exclude=['test']),
     package_dir={'gerritssh': 'gerritssh'},
     include_package_data=True,
-    install_requires=['paramiko>=1.13,<2',
+    install_requires=['paramiko>=1.15,<2',
                       'semantic-version>=2.3,<3'
                      ],
     license='Apache',
@@ -73,7 +73,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    tests_require=['pytest>=2.3.5'],
+    tests_require=['pytest>=2.6.3'],
     cmdclass={'test': PyTest},
     scripts=['gsshcli.py'],
 )
