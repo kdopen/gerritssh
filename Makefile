@@ -54,7 +54,7 @@ test-all-online:
 	GSSH_TEST_INSTANCE='review.openstack.org' tox
 
 coverage:
-	coverage run --source gerritssh setup.py test
+	coverage run --source gerritssh --branch setup.py test
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
