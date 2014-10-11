@@ -33,6 +33,8 @@ def test_init(open_review):
 
     _ = review.Patchset(open_review, {})
 
+    _ = review.Review({'url': 'gerrit.example.com'})
+
 
 def test_conversions(open_review_text, open_review_json):
     '''

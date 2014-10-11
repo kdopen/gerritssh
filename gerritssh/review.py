@@ -153,7 +153,8 @@ class Review(object):
             cps = Patchset(self, self.raw['currentPatchSet'])
             self.__patchsets[cps.number] = cps
 
-        self.__highestPatchSetNumber = max(self.patchsets.keys())
+        if self.__patchsets: 
+            self.__highestPatchSetNumber = max(self.__patchsets.keys())
 
     def __getattr__(self, name):
         '''
